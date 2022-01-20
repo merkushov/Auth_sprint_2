@@ -1,0 +1,35 @@
+version: "3.9"
+
+networks:
+  yp_test_network:
+    driver: bridge
+
+services:
+  auth_test_api:
+    build:
+      context: ../../
+      dockerfile: devops/docker/auth_api/Dockerfile
+      target: test
+    command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--reload", "main:app"]
+    container_name: yp_auth_test_api
+
+  # дополнительная тестовая БД для авто-тестов
+  auth_test_db:
+    build:
+      context: ../../
+      dockerfile: devops/docker/auth_db/Dockerfile
+    container_name: yp_auth_test_db
+    restart: always
+    env_file:
+      - ../../devops/auth_db/.env
+    networks:
+      - yp_network
+
+  # дополнительная тестовый Redis для авто-тестов
+  auth_test_redis:
+    image: redis:6.2.5-alpine
+    container_name: yp_auth_test_redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - yp_network

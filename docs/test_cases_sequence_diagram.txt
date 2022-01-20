@@ -1,0 +1,126 @@
+@startuml
+actor       Пользователь   as User
+participant MovieAPI       as API
+participant Auth           as Auth
+participant AuthDB         as AuthDB
+participant AuthRedis      as AuthRedis
+
+title Диаграма Сервисов (успешные кейсы)
+
+group Кейс 2: Успешно залогиниться (GET /login)
+User -> Auth : логин + пароль
+Auth -> AuthDB : Запрос данных Пользователя по логину
+Auth <- AuthDB : Данные Пользователя
+Auth <- Auth : Проверка пароля
+note left of Auth
+Входящий пароль хэшируется
+и сравнивается с хэшем пароля из БД
+end note
+Auth -> AuthDB : Запрос Ролей Пользователя
+Auth <- AuthDB : Роли Пользователя
+Auth <- Auth : Генерация jti 
+note left of Auth
+Генерируем униальный ID в формате UUID4.
+Он будет объединять два токена в пару.
+end note
+note left Auth #FFAAAA: Требование: Выйти из остальных аккаунтов
+Auth <- Auth : Генерация двух JWT токенов\n - access-токен с jti, expired, userID и roles\n - refresh-токен c jti, expired, userID
+Auth -> AuthDB : Сохранение refresh-токена
+note right of Auth : по ключу jti с привязкой к Пользователю
+Auth -> AuthDB : Запись факта логина
+User <- Auth : access-токен и refresh-токен
+
+end
+
+group Кейс 3: Запросить список фильмов, имеющий ограничение по Роли (GET /api/v1/film)
+
+User -> API : HTTP заголовок - \nAuthorization: Bearer <access-token>
+API -> Auth : проксирование запроса \nс HTTP заголовками на (GET /me)
+Auth <- Auth : Проверка подписи JWT-токена
+Auth <- Auth : Проверка на истечение \nвремени жизни JWT-токена
+Auth -> AuthRedis : Проверка access-токена по \nBlack-листу\n
+note right Auth
+Поиск по jti идентификатору пары.
+Токена не должно быть в Black-листе.
+Это означает, что с помощью этого
+токена ещё не выходили (/logout)
+end note
+note right Auth #FFAAAA: Требование: Мгновенный разлогин
+Auth <- Auth : Извлечение данных о \nРолях Пользователя \nиз JWT-токена
+API <- Auth : Список Ролей пользователя
+API <- API : Выборка данных, согласно \nРоли пользователя
+User <- API : Список фильмов
+end
+
+group Кейс 4: Запросить список фильмов, имеющий ограничение по Роли c истекшем access-токеном (GET /api/v1/film)
+User -> API : HTTP заголовок - \nAuthorization: Bearer <access-token>
+API -> Auth : проксирование запроса \nс HTTP заголовками на (GET /me)
+Auth -> Auth : Проверка подписи JWT-токена
+Auth -> Auth : Проверка на истечение \nвремени жизни JWT-токена
+API <- Auth  : Статус 401 \nс сообщением об ошибке
+User <- API : Статус 401 \nс сообщением об ошибке
+end
+
+group Кейс 5. Обновить access-токен (PUT /me/refresh_token)
+User -> Auth : refresh-токен (анонимный запрос, без access-токена)
+Auth <- Auth : проверить подпись JWT токена
+Auth <- Auth : Проверка на истечение \nвремени жизни refresh-токена
+Auth -> AuthDB : Запрос refresh-токена по jti
+Auth <- AuthDB : Запись о refresh-токене
+note right of Auth : необходимо убедиться, что токен валидный
+Auth <- Auth : Извлечение идентификатора Пользователя \nиз refresh-токена
+Auth -> AuthDB : Запрос Ролей Пользователя
+Auth <- AuthDB : Роли Пользователя
+Auth <- Auth : Генерация jti 
+note left of Auth
+Генерируем униальный ID в формате UUID4.
+Он будет объединять два токена в пару.
+end note
+note left Auth #FFAAAA: Требование: Выйти из остальных аккаунтов
+Auth <- Auth : Генерация двух JWT токенов\n - access-токен с jti, expired, userID и roles\n - refresh-токен c jti, expired, userID
+Auth -> AuthDB : Сохранение refresh-токена
+note right of Auth : по новому ключу jti с привязкой к Пользователю
+Auth -> AuthDB : Удаление старого refresh-токена
+note right of Auth : по старому ключу jti (получен из старого refresh-токена)
+Auth -> AuthRedis : текущий access-токен кладём в Black-лист
+note right of Auth
+По jti создаём запись в Black-листе
+о том что текущий access-токен больше
+не валиден. Выставляем TTL равный времени
+жизни access-токена
+end note
+note right Auth #FFAAAA: Требование: Мгновенный разлогин
+User <- Auth : access-токен и refresh-токен
+end
+
+group Кейс 6. Выйти со всех устройств, кроме текущего (GET /me/logout_from_everywhere)
+User -> Auth : HTTP заголовок - \nAuthorization: Bearer <access-token>
+Auth <- Auth : проверить подпись JWT токена
+Auth <- Auth : Проверка на истечение \nвремени жизни refresh-токена
+Auth <- Auth : Вытащить из payload userID и jti \n(идентификатор пары токенов)
+Auth -> AuthDB : Запросить все refresh-токены по userID
+Auth <- AuthDB : Список идентификаторов jti \nвсех refresh-токенов Пользователя
+Auth -> AuthDB : Удалить все refresh-токены, кроме текущего
+note right Auth : использовать список jti из предыдущего запроса к БД
+Auth -> AuthRedis : access-токены кладём в Black-лист
+note right of Auth
+По списку jti создаём запись в Black-листе
+о том что все, кроме текущего (определяем по jti),
+access-токены больше не валидны.
+Выставляем TTL равный времени жизни access-токена
+end note
+note right Auth #FFAAAA: Требование: Мгновенный разлогин
+User <- Auth : Статус 200\nв теле {}
+end
+
+
+group Кейс 7. Разлогиниться (GET /me/logout)
+User -> Auth : HTTP заголовок - \nAuthorization: Bearer <access-token>
+Auth <- Auth : проверить подпись JWT токена
+Auth <- Auth : Проверка на истечение \nвремени жизни JWT-токена
+Auth -> AuthRedis : Добавить access-токен в Black-лист
+note right Auth : установить TTL равный expired \nиз access-токена
+note right Auth #FFAAAA: Требование: Мгновенный разлогин
+User <- Auth : Статус 200\nв теле {}
+end
+@enduml

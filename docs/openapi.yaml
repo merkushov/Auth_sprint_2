@@ -1,0 +1,581 @@
+openapi: 3.0.1
+info:
+  title: Auth API
+  description: Сервис авторизации
+  termsOfService: ""
+  contact:
+    email: merkushov.victor@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://localhost/v1
+- url: http://localhost/v1
+tags:
+- name: public
+  description: Публичный интерфейс
+- name: me
+  description: Возможности авторизованного пользователя по работе с собственными данными
+- name: role
+  description: Управление Ролями
+- name: user_role
+  description: Пользователь-Роль
+paths:
+  /login:
+    post:
+      tags:
+      - public
+      summary: Войти в аккаунт
+      description: Аутентификаци Пользователя в системе
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - login
+              - password
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+  /user:
+    post:
+      tags:
+      - public
+      summary: Создать пользователя
+      description: Создать нового пользователя
+      requestBody:
+        description: Объект, содержащий информацию о Пользователе
+        required: true
+        content:
+          applicatioin/json:
+            schema:
+              $ref: '#/components/schemas/InputCreateUser'
+      responses:
+        201:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        409:
+          $ref: '#/components/responses/409_Conflict'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+  /me:
+    put:
+      tags:
+      - me
+      summary: Обновить данные
+      description: Обновить данные уже существующего Пользователя
+      requestBody:
+        description: Объект, содержащий информацию о Пользователе
+        required: true
+        content:
+          applicatioin/json:
+            schema:
+              $ref: '#/components/schemas/InputUpdateUser'
+      responses:
+        200:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+  /me/logout:
+    get:
+      tags:
+      - me
+      summary: Выйти из аккаунта
+      description: Выйти из аккаунта и закрыть сессию
+      responses:
+        200:
+          description: Успешное выполнение запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObject'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+      security:
+      - bearerAuth: []
+  /me/logout_other_devices:
+    get:
+      tags:
+      - me
+      summary: Выйти из остальных аккаунтов
+      description: Выход из всех активных сессий Пользователя, кроме текущей
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObject'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+      security:
+      - bearerAuth: []
+  /me/refresh_token:
+    put:
+      tags:
+      - public
+      summary: Обновить access-токен
+      description: Обновить access-токен Пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - refresh_token
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Долгоживущий refresh-токен
+      responses:
+        200:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+  /me/access_history:
+    get:
+      tags:
+      - me
+      summary: Посмотреть история входов
+      description: Отображает данные о входах пользователя в систему с различных устройств
+      responses:
+        200:
+          description: Данные истории входов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfAccessHistory'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+      security:
+      - bearerAuth: []
+  /role:
+    get:
+      tags:
+      - role
+      summary: Список ролей
+      description: Список всех ролей
+      responses:
+        200:
+          description: Список ролей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfRoles'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - role
+      summary: Создать Роль
+      requestBody:
+        description: Объект, содержащий информацию о Роли
+        required: true
+        content:
+          applicatioin/json:
+            schema:
+              $ref: '#/components/schemas/InputCreateRole'
+      responses:
+        201:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        409:
+          $ref: '#/components/responses/409_Conflict'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+  /role/{roleId}:
+    get:
+      tags:
+      - role
+      summary: Полсмотреть роль
+      parameters:
+        - in: path
+          name: roleId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Роли
+      responses:
+        200:
+          description: Роль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - role
+      summary: Обновить роль
+      parameters:
+        - in: path
+          name: roleId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Роли
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputUpdateRole'
+      responses:
+        200:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - role
+      summary: Удалить Роль
+      parameters:
+        - in: path
+          name: roleId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Роли
+      responses:
+        204:
+          description: Роль успешно удалена
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+      
+  /user/{userId}/role/{roleId}:
+    get:
+      tags:
+      - user_role
+      summary: Проверить Роль у Пользователя
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Пользователя
+        - in: path
+          name: roleId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Роли
+      responses:
+        200:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HasRole'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+        409:
+          $ref: '#/components/responses/409_Conflict'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - user_role
+      summary: Назначить Пользователю Роль
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Пользователя
+        - in: path
+          name: roleId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Роли
+      responses:
+        201:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyObject'
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+        409:
+          $ref: '#/components/responses/409_Conflict'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - user_role
+      summary: Удалить Роль у Пользователя
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Пользователя
+        - in: path
+          name: roleId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Идентификатор Роли
+      responses:
+        204:
+          description: Роль успешно удалена у Пользователя
+        401:
+          $ref: '#/components/responses/401_Unauthorized'
+        403:
+          $ref: '#/components/responses/403_Forbidden'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+      - bearerAuth: []
+components:
+  responses:
+    401_Unauthorized:
+      description: Не удалось аутентифицировать пользователя. Access-токен отсутствует или не валиден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    403_Forbidden:
+      description: Пользователю не хватает прав доступа
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404_NotFound:
+      description: Ресурса с таким уникальным ключом не существует
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    409_Conflict:
+      description: Ресурс с таким уникальным ключом уже существует
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    422_UnprocessableEntity:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: Неожиданная ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    UserIDBase:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Идентификатор Пользователя (в формате UUID)
+    UserBase:
+      type: object
+      properties:
+        username:
+          type: string
+          description: имя пользователя
+        email:
+          type: string
+          description: email пользователя
+        password:
+          type: string
+          description: пароль пользователя
+    InputCreateUser:
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+        - type: object
+          required:
+          - username
+          - email
+          - password
+    InputUpdateUser:
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+        - $ref: '#/components/schemas/UserIDBase'
+    User:
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+        - $ref: '#/components/schemas/UserIDBase'
+        - type: object
+          required:
+          - username
+          - email
+          - password
+    TokenPair:
+      required:
+      - "access"
+      - "refresh"
+      type: object
+      properties:
+        access:
+          type: string
+          description: Короткоживущий токен, для доступа к данным
+        refresh:
+          type: string
+          description: Долгоживущий токен, для обновления access-токена
+      xml:
+        name: Order
+    Error:
+      type: object
+      required:
+      - "message"
+      properties:
+        message:
+          type: string
+          description: Серверное сообщение об ошибке
+    EmptyObject:
+      type: object
+    AccessHistory:
+      type: object
+      properties:
+        user_agent:
+          type: string
+          description: Информация о браузере пользователя
+        datetime:
+          type: string
+          format: date-time
+          description: Дата входа
+    ListOfAccessHistory:
+      type: array
+      items:
+        $ref: '#/components/schemas/AccessHistory'
+    HasRole:
+      type: object
+      required:
+      - has_role
+      properties:
+        has_role:
+          type: boolean
+          description: флаг наличия Роли у Пользователя
+    Role:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: идентификатор Роли
+        name:
+          type: string
+          description: имя Роли
+    InputCreateRole:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: имя Роли
+    InputUpdateRole:
+      $ref: '#/components/schemas/InputCreateRole'
+    ListOfRoles:
+      type: array
+      items:
+        $ref: '#/components/schemas/Role'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  

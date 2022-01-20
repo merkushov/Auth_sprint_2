@@ -1,0 +1,53 @@
+version: "3.9"
+
+networks:
+  yp_network:
+
+volumes:
+  yp_auth_db_data:
+  yp_auth_redis_data:
+
+services:
+  auth_db:
+    build:
+      context: ../../
+      dockerfile: devops/docker/auth_db/Dockerfile
+    container_name: yp_auth_db
+    restart: always
+    env_file:
+      - ../../devops/auth_db/.env
+    volumes:
+      - yp_auth_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - yp_network
+
+  auth_redis:
+    image: redis:6.2.5-alpine
+    container_name: yp_auth_redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - yp_auth_redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - yp_network
+
+  auth_api:
+    build:
+      context: ../../
+      dockerfile: devops/docker/auth_api/Dockerfile
+    container_name: yp_auth_app
+    user: "authapi"
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../../devops/auth_api/.env
+    depends_on:
+      - auth_db
+      - auth_redis
+    networks:
+      - yp_network

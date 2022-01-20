@@ -1,0 +1,8 @@
+-r base.txt
+-r test.txt
+
+flake8==4.0.1
+black==21.11b1
+isort==5.10.1
+docformatter==1.4
+pydocstyle==6.1.1
