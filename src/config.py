@@ -62,6 +62,9 @@ class Config(object):
 
     POSSIBLE_ROLE_NAMES = [ADMIN_ROLE_NAME, USER_ROLE_NAME, SUBSCRIBER_ROLE_NAME]
 
+    RATE_LIMIT_THRESHOLD_ANNON_PER_MINUTE = 30
+    RATE_LIMIT_THRESHOLD_REGISTERED_PER_MINUTE = 50
+
 
 class ProductionConfig(Config):
     """Конфиг для продакшена."""

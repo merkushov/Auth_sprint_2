@@ -7,6 +7,7 @@ from flask import Response
 from models.db.auth_model import User
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestUpdateCurrentUser:
     url = "/api/v1/me"
     original_user = dict(

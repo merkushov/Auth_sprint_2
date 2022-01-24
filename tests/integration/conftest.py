@@ -13,6 +13,7 @@ import pytest
 import sqlalchemy as sa
 from alembic.config import Config as AlembicConfig
 from flask import Response
+from flask_redis import FlaskRedis
 
 from app import create_app
 from config import TestingConfig
@@ -146,3 +147,11 @@ def auth_request(test_user, client) -> dict:
         headers={"Authorization": f"Bearer {access_token}"},
         content_type="application/json",
     )
+
+@pytest.fixture(scope="class")
+async def clear_cache(app):
+    redis_client = FlaskRedis()
+    redis_client.init_app(app)
+    redis_client.flushall()
+    yield
+    redis_client.flushall()

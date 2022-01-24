@@ -4,10 +4,11 @@ from http import HTTPStatus as status
 import pytest
 from flask import Response
 
-from black_list_storage import redis_client
+from redis_client import redis_client
 from services import get_jwt_service
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestLogout:
     """Тестирование разлогина пользователя."""
 

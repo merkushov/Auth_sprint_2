@@ -1,10 +1,11 @@
 from flask import Flask, Response, jsonify
 
 from api.routes import init_routes
-from black_list_storage import init_black_list_storage
 from config import Config, app_config
 from db import init_db, init_migrate
 from exceptions import ApiException
+from rate_limit import init_rate_limit
+from redis_client import init_redis
 from scripts import init_scripts
 
 
@@ -20,7 +21,7 @@ def create_app(config_obj: Config = app_config):
 
     app.config.from_object(config_obj)
 
-    init_black_list_storage(app)
+    redis_client = init_redis(app)
 
     db = init_db(app)
     init_migrate(app, db)
@@ -28,6 +29,8 @@ def create_app(config_obj: Config = app_config):
     init_routes(app)
 
     init_scripts(app)
+
+    init_rate_limit(app, redis_client)
 
     app.register_error_handler(ApiException, custom_api_exceptions)
 

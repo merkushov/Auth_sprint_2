@@ -2,8 +2,10 @@ import json
 from http import HTTPStatus as status
 
 from flask import Response
+import pytest
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestCheckUserRole:
     url = "/api/v1/user/{user_id}/role/{role_id}"
 

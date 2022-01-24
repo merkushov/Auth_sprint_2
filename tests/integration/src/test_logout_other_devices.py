@@ -9,6 +9,7 @@ from models.db.auth_model import RefreshJwt
 from services import get_jwt_service
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestLogoutOtherDevices:
     """Тестирование разлогина пользователя из других активных сессий."""
 

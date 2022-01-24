@@ -2,10 +2,12 @@ import json
 from http import HTTPStatus as status
 
 from flask import Response
+import pytest
 
 from models.db.auth_model import User
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestRegisterUser:
     url = "/api/v1/user"
     user = dict(username="Test Test", password="Test", email="autotest@yandex.ru")

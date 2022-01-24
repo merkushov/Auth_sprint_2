@@ -140,3 +140,13 @@ class ApiRoleValidationException(ApiInvalidParamsException):
 
 class ApiUserRoleValidationException(ApiInvalidParamsException):
     message = "Ошибка валидации Пользователя или Роли"
+
+
+#
+# Rate limit
+#
+
+
+class ApiTooManyRequestsException(ApiException):
+    http_status_code = 429
+    message = "Превышен лимит количества запросов"

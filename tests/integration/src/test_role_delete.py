@@ -1,10 +1,12 @@
 from http import HTTPStatus as status
 
 from flask import Response
+import pytest
 
 from models.db.auth_model import Role
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestDeleteRole:
     url = "/api/v1/role/{role_id}"
     role = {"name": "test_role_name"}

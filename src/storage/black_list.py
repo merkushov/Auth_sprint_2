@@ -1,12 +1,13 @@
 import abc
 from typing import Optional
 
-from black_list_storage import redis_client
 from config import Config
+from redis_client import redis_client
 
 
 class IBlackListStorage:
     """Базовый абстрактный класс хранилища данных для невалдных токенов."""
+
     @abc.abstractmethod
     def _key(self, jti: str) -> str:
         pass

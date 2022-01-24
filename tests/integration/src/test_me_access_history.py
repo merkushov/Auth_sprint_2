@@ -8,6 +8,7 @@ from flask import Response
 from models.db.auth_model import LoginHistory
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestUserAccessHistory:
     url = "/api/v1/me/access_history"
     original_user = dict(

@@ -1,12 +1,15 @@
 import json
 from http import HTTPStatus as status
 
+import pytest
+
 from flask import Response
 
 # TODO: Эти кейсы можно описать проще.
 #       Отрефакторить, если будет время
 
 
+@pytest.mark.usefixtures("clear_cache")
 def test_authorized_access(client):
     original_user = dict(
         username="Test Test Test",

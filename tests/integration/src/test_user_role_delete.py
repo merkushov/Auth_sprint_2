@@ -7,6 +7,7 @@ from flask import Response
 from models.db.auth_model import User
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestDeleteUserRole:
     url = "/api/v1/user/{user_id}/role/{role_id}"
     role = {"name": "test_role_deleted"}

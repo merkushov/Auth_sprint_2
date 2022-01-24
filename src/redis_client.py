@@ -4,7 +4,7 @@ from flask_redis import FlaskRedis
 redis_client = FlaskRedis()
 
 
-def init_black_list_storage(app: Flask) -> None:
+def init_redis(app: Flask) -> FlaskRedis:
     redis_client.init_app(app)
 
-    return None
+    return redis_client

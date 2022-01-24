@@ -7,6 +7,7 @@ from flask import Response
 from models.db.auth_model import LoginHistory, User
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestLogin:
     """Тестирование логина пользователя."""
 

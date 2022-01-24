@@ -5,6 +5,7 @@ import pytest
 from flask import Response
 
 
+@pytest.mark.usefixtures("clear_cache")
 class TestLogin:
     """Тестирование обновления refresh-токена."""
 
