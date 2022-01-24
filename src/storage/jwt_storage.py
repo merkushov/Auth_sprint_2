@@ -37,7 +37,6 @@ class IJwtStorage:
 
 
 class PostgresJwtStorage(IJwtStorage):
-
     def remove_refresh_tokens(self, tokens_jti: List[str]):
         for jti in tokens_jti:
             db.session.query(RefreshJwt).filter(RefreshJwt.id == jti).delete()

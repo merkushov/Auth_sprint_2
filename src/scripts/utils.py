@@ -6,8 +6,7 @@ class WeakPassword(Exception):
 
 
 def check_password_complexity(password) -> None:
-    """
-    Password complexity check.
+    """Password complexity check.
 
     Primary conditions for password validation :
 

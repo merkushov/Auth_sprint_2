@@ -1,9 +1,9 @@
-from flask import jsonify, request
-
 from http import HTTPStatus as status
 
+from flask import jsonify, request
+
 from api.helpers import auth_required
-from models.api.tokens import InputRefreshToken, TokenPair, AccessToken
+from models.api.tokens import AccessToken, InputRefreshToken, TokenPair
 from models.api.user import InputCreateUser, InputLoginUser, User
 from services import (
     AuthService,

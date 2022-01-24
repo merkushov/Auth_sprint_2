@@ -1,8 +1,8 @@
 from functools import lru_cache
 
+from api.v1.controllers.access_history import AccessHistoryController
 from api.v1.controllers.auth import AuthController
 from api.v1.controllers.health_check import HealthCheckController
-from api.v1.controllers.access_history import AccessHistoryController
 from api.v1.controllers.role import RoleController
 from api.v1.controllers.user import UserController
 

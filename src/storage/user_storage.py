@@ -12,7 +12,7 @@ from exceptions import (
     ApiUserAlreadyExistsException,
     ApiUserNotFoundException,
 )
-from models.db.auth_model import LoginHistory, User, Role
+from models.db.auth_model import LoginHistory, Role, User
 
 
 class IUserStorage:
@@ -42,8 +42,7 @@ class IUserStorage:
 
     @abc.abstractmethod
     def set_user_role(self, role_name: str, user_name: str):
-        """
-        Установить пользователю роль.
+        """Установить пользователю роль.
 
         :param role_name: имя роли
         :param user_name: имя пользователя
@@ -59,7 +58,6 @@ class IUserStorage:
 
 
 class PostgresUserStorage(IUserStorage):
-
     def create_user(self, username: str, email: str, password_hash: str) -> User:
         user = User(username=username, email=email, password_hash=password_hash)
         db.session.add(user)

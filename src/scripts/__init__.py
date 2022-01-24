@@ -7,7 +7,6 @@ from scripts.user import create_user, get_user
 
 
 def init_scripts(app: Flask):
-
     @app.cli.command("createuser")
     def create_user_command():
         """Создать простого пользователя."""

@@ -4,8 +4,12 @@ from services.auth_service import AuthService
 from services.jwt_service import JWTService
 from services.role_service import RoleService
 from services.user_service import UserService
-from storage import get_black_list_storage, get_jwt_storage, get_user_storage, \
-    get_role_storage
+from storage import (
+    get_black_list_storage,
+    get_jwt_storage,
+    get_role_storage,
+    get_user_storage,
+)
 
 
 @lru_cache

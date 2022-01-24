@@ -1,15 +1,14 @@
 """Контроллер обслуживающий функционал Пользователь-Роль."""
 import logging
+from http import HTTPStatus as status
 from uuid import UUID
 
 from flask import jsonify, request
 
-from http import HTTPStatus as status
-
 import exceptions as exc
 from api.helpers import auth_required
 from models.api.tokens import AccessToken
-from models.api.user import InputUserRole, InputUpdateUser, OutputUser, User
+from models.api.user import InputUpdateUser, InputUserRole, OutputUser, User
 from services import UserService, get_user_service
 
 

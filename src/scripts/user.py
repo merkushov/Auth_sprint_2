@@ -1,10 +1,10 @@
 import click
-from email_validator import validate_email, EmailSyntaxError
+from email_validator import EmailSyntaxError, validate_email
 
 from exceptions import ApiUserAlreadyExistsException
 from models.api.user import InputCreateUser
-from scripts.utils import check_password_complexity, WeakPassword
-from services import UserService, get_user_service, RoleService, get_role_service
+from scripts.utils import WeakPassword, check_password_complexity
+from services import RoleService, UserService, get_role_service, get_user_service
 
 
 def _user_name_prompt():
@@ -25,8 +25,9 @@ def _user_email_prompt():
 
     while not email_is_valid:
         try:
-            validated_email_object = click.prompt("Enter email", type=str, default="",
-                                                  value_proc=validate_email)
+            validated_email_object = click.prompt(
+                "Enter email", type=str, default="", value_proc=validate_email
+            )
         except EmailSyntaxError:
             click.echo("Email should be in valid format!!!")
         else:
@@ -36,8 +37,7 @@ def _user_email_prompt():
 
 
 def _user_password_prompt(ref_password=None):
-    """
-    Запрос и поверка пароля.
+    """Запрос и поверка пароля.
 
     :param ref_password: пароль-образец. Если не задан - пароль вводится впервые, иначе
     функция работает в режиме подтверждения ранее введенного пароля.
@@ -56,21 +56,27 @@ def _user_password_prompt(ref_password=None):
             try:
                 check_password_complexity(password)
             except WeakPassword:
-                if not click.confirm("Password is weak, use it anyway?", default=False,
-                                     show_default=True, err=False):
-                    password = ''
+                if not click.confirm(
+                    "Password is weak, use it anyway?",
+                    default=False,
+                    show_default=True,
+                    err=False,
+                ):
+                    password = ""
         else:
             if password != ref_password:
                 click.echo("Password confirmation is incorrect!!!")
-                password = ''
+                password = ""
 
     return password
 
 
-def create_user(user_role: str, user_service: UserService = get_user_service(),
-                role_service: RoleService = get_role_service()):
-    """
-    Создать пользователя в базе данных.
+def create_user(
+    user_role: str,
+    user_service: UserService = get_user_service(),
+    role_service: RoleService = get_role_service(),
+):
+    """Создать пользователя в базе данных.
 
     :param role_service: сервис, отвечающий за роли
     :param user_role: роль
@@ -99,12 +105,11 @@ def create_user(user_role: str, user_service: UserService = get_user_service(),
 
 
 def get_user(name, user_service: UserService = get_user_service()):
-    """
-    Найти пользователя по имени в базе данных.
+    """Найти пользователя по имени в базе данных.
 
     :param user_service: сервис, отвечающий за работу с пользователями
     :param name: имя пользователя
     """
     user = user_service.get_user(username=name)
 
-    click.echo(f'{user.username}, {user.roles}')
+    click.echo(f"{user.username}, {user.roles}")

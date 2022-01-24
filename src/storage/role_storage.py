@@ -34,7 +34,6 @@ class IRoleStorage:
 
 
 class PostgresRoleStorage(IRoleStorage):
-
     def get_roles(self) -> list[Role]:
         """Получить все Роли."""
 

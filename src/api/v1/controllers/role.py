@@ -1,10 +1,9 @@
 """Контроллер обслуживающий Роли."""
 
+from http import HTTPStatus as status
 from uuid import UUID
 
 from flask import jsonify, request
-
-from http import HTTPStatus as status
 
 from api.helpers import auth_required
 from models.api.role import InputRole, InputRoleID, Role

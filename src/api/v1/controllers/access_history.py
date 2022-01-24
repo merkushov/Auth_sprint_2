@@ -1,6 +1,7 @@
 """Все эндпоинты относящиеся к Авторизованному пользователю."""
 
 from flask import jsonify
+
 from api.helpers import auth_required
 from models.api.tokens import AccessToken
 from services import UserService, get_user_service
