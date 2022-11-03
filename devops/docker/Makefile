@@ -10,8 +10,8 @@ else
 DOCKER_COMPOSE_FILE=-f docker-compose.dev.yml
 endif
 
-DOCKER_COMPOSE=docker-compose -f docker-compose.yml $(DOCKER_COMPOSE_FILE)
-DOCKER_COMPOSE_TEST=docker-compose -f docker-compose.test.yml
+DOCKER_COMPOSE=docker-compose -f docker-compose.yml $(DOCKER_COMPOSE_FILE) --env-file ../.env
+DOCKER_COMPOSE_TEST=docker-compose -f docker-compose.test.yml --env-file ../.env
 
 # имя контейнеров в docker-compose
 DOCKER_AUTH_API=auth_api
@@ -22,6 +22,7 @@ DOCKER_AUTH_API_TEST=auth_test_api
 DOCKER_AUTH_DB_TEST=auth_test_db
 DOCKER_AUTH_REDIS_TEST=auth_test_redis
 
+OS := $(shell uname)
 .DEFAULT_GOAL := help
 
 help:	## список доступных команд
@@ -35,17 +36,26 @@ env_dev_setup:	## настроить переменные development окруж
 	@cp ../.env.example ../.env
 
 	# сгенерировать рандомные пароли для PostgreSQL
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -i sed -i -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
+	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -i sed -i 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -i sed -i 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
 
 	# установить HOST_UID = UID текущего пользователя. Это влияет на UID пользователя внутри контейнера.
 	# Нужно для совместимости прав доступа к сгенерированным файлам у хостового пользователя
-	`id -u | xargs -i sed -i 's/HOST_UID=.*/HOST_UID={}/' ../.env`
-	`id -g | xargs -i sed -i 's/HOST_GID=.*/HOST_GID={}/' ../.env`
-.PHONY: env_setup
+
+	# Хак! Я не знаю, как правильно сматчить GroupID между
+	# 	   MacOS (host) и Linux (docker os)
+	@if [[ $(OS) = 'Darwin' ]]; then \
+		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
+		`sed -i '' 's/HOST_GID=.*/HOST_GID=61/' ../.env`; \
+	else \
+		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
+		`id -g | xargs -I '{}' sed -i '' 's/HOST_GID=.*/HOST_GID={}/' ../.env`; \
+  	fi
+
+.PHONY: env_dev_setup
 
 docker/build:	## build the environment
 	$(DOCKER_COMPOSE) --env-file ../.env build
@@ -104,7 +114,7 @@ db/psql:		## интерактивный терминал PostgreSQL
 .PHONY: db/psql
 
 db/waiting_for_readiness:
-	$(DOCKER_COMPOSE) exec $(DOCKER_AUTH_DB) bash -c 'until pg_isready 2>/dev/null; do sleep 1 ; done; echo "Database ready."'
+	$(DOCKER_COMPOSE) --env-file ../.env exec $(DOCKER_AUTH_DB) bash -c 'until pg_isready 2>/dev/null; do sleep 1 ; done; echo "Database ready."'
 .PHONY: db/waiting_for_readiness
 
 #
@@ -112,7 +122,7 @@ db/waiting_for_readiness:
 #
 
 redis/redis_waiting_for_readiness:	## ожидать готовности Redis
-	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_REDIS_TEST) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
+	$(DOCKER_COMPOSE) --env-file ../.env exec $(DOCKER_AUTH_REDIS) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
 .PHONY: redis/redis_waiting_for_readiness
 
 #
@@ -125,11 +135,11 @@ env_test_setup:		## настроить переменные окружения �
 	@cp ../.env.example ../.env
 
 	# сгенерировать рандомные пароли для PostgreSQL
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -i sed -i -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
+	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -i sed -i 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -i sed -i 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
 .PHONY: env_setup
 
 auth_api_test/destroy:		## остановить/удалить контейнеры для тестов и очистить тестовые данные
@@ -149,7 +159,7 @@ auth_api_test/db_waiting_for_readiness:	## ожидать готовность �
 .PHONY: auth_api_test/db_waiting_for_readiness
 
 auth_api_test/redis_waiting_for_readiness:	## ожидать готовности тестового Redis
-	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_REDIS_TEST) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_AUTH_REDIS_TEST) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
 .PHONY: auth_api_test/redis_waiting_for_readiness
 
 auth_api_test/run:	## запустить функциональные тесты API

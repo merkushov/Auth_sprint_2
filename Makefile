@@ -17,6 +17,7 @@ dev/setup:	## настроить инфраструктуру для разра�
 	$(SUBMAKE_DEVOPS) docker/destroy
 	$(SUBMAKE_DEVOPS) docker/build
 	$(SUBMAKE_DEVOPS) docker/up
+	$(SUBMAKE_DEVOPS) redis/redis_waiting_for_readiness
 	$(SUBMAKE_DEVOPS) db/waiting_for_readiness
 	$(SUBMAKE_DEVOPS) auth_api/migrate
 .PHONY: dev/setup

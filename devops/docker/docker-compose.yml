@@ -43,7 +43,7 @@ services:
     user: "authapi"
     restart: always
     ports:
-      - "5000:5000"
+      - "5005:5000"
     env_file:
       - ../../devops/auth_api/.env
     depends_on:

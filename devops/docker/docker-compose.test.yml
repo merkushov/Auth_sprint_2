@@ -23,7 +23,7 @@ services:
     env_file:
       - ../../devops/auth_db/.env
     networks:
-      - yp_network
+      - yp_test_network
 
   # дополнительная тестовый Redis для авто-тестов
   auth_test_redis:
@@ -32,4 +32,4 @@ services:
     restart: always
     command: ["redis-server", "--appendonly", "yes"]
     networks:
-      - yp_network
+      - yp_test_network

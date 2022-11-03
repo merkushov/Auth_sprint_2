@@ -27,7 +27,7 @@ RUN groupadd -g $gid ${GROUP} && \
     mkdir ${HOMEDIR} && \
     chown -R ${USER}:${GROUP} ${HOMEDIR}
 
-COPY --chown=${USER}:${USER} devops/auth_api/requirements ${APP_REQUIREMENTS}
+COPY --chown=${USER}:${GROUP} devops/auth_api/requirements ${APP_REQUIREMENTS}
 
 USER ${USER}
 
@@ -42,7 +42,7 @@ FROM base AS production
 
 USER ${USER}
 
-COPY --chown=${USER}:${USER} src ${APP_HOME}
+COPY --chown=${USER}:${GROUP} src ${APP_HOME}
 
 RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/prod.txt"
 
@@ -56,8 +56,8 @@ USER root
 
 RUN mkdir ${APP_TEST}
 
-COPY --chown=${USER}:${USER} src ${APP_HOME}
-COPY --chown=${USER}:${USER} tests ${APP_TEST}
+COPY --chown=${USER}:${GROUP} src ${APP_HOME}
+COPY --chown=${USER}:${GROUP} tests ${APP_TEST}
 
 USER ${USER}
 

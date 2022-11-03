@@ -1,11 +1,5 @@
 version: "3.9"
 
-secrets:
-  develop_host_ssh_key:
-    file: ${HOME}/.ssh/github_rsa
-  gitconfig:
-    file: ${HOME}/.gitconfig
-
 services:
   auth_api:
     build:
@@ -16,12 +10,3 @@ services:
     command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
       - ../../:/usr/src/auth_app
-    secrets:
-      - source: develop_host_ssh_key
-        target: /home/authapi/.ssh/id_rsa
-      - source: gitconfig
-        target: /home/authapi/.gitconfig
-
-  auth_db:
-    volumes:
-      - ../../devops/docker/auth_db/docker-postgresql-multiple-databases.sh:/docker-entrypoint-initdb.d/docker-postgresql-multiple-databases.sh
