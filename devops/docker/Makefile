@@ -58,11 +58,11 @@ env_dev_setup:	## настроить переменные development окруж
 .PHONY: env_dev_setup
 
 docker/build:	## build the environment
-	$(DOCKER_COMPOSE) --env-file ../.env build
+	$(DOCKER_COMPOSE) build
 .PHONY: docker/build
 
 docker/start:	## поднять Докер
-	$(DOCKER_COMPOSE) --env-file ../.env up -d
+	$(DOCKER_COMPOSE) up -d
 .PHONY: docker/start
 
 # alias for docker/start
@@ -78,7 +78,7 @@ docker/down: 	## остановить и удалить все контейне�
 .PHONY: docker/down
 
 docker/destroy:	## остановить/удалить контейнеры и очистить данные Приложения
-	$(DOCKER_COMPOSE) --env-file ../.env down --volumes --remove-orphans
+	$(DOCKER_COMPOSE) down --volumes --remove-orphans
 .PHONY: docker/destroy
 
 #
@@ -114,7 +114,7 @@ db/psql:		## интерактивный терминал PostgreSQL
 .PHONY: db/psql
 
 db/waiting_for_readiness:
-	$(DOCKER_COMPOSE) --env-file ../.env exec $(DOCKER_AUTH_DB) bash -c 'until pg_isready 2>/dev/null; do sleep 1 ; done; echo "Database ready."'
+	$(DOCKER_COMPOSE) exec $(DOCKER_AUTH_DB) bash -c 'until pg_isready 2>/dev/null; do sleep 1 ; done; echo "Database ready."'
 .PHONY: db/waiting_for_readiness
 
 #
@@ -122,7 +122,7 @@ db/waiting_for_readiness:
 #
 
 redis/redis_waiting_for_readiness:	## ожидать готовности Redis
-	$(DOCKER_COMPOSE) --env-file ../.env exec $(DOCKER_AUTH_REDIS) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
+	$(DOCKER_COMPOSE) exec $(DOCKER_AUTH_REDIS) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
 .PHONY: redis/redis_waiting_for_readiness
 
 #
