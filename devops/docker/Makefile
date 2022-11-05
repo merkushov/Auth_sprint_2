@@ -35,12 +35,9 @@ env_dev_setup:	## настроить переменные development окруж
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 
-	# сгенерировать рандомные пароли для PostgreSQL
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
-
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 32 | xargs -I '{}' sed -i -e "s/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/" ../auth_api/.env`
+	`env LC_CTYPE=C cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 32 | xargs -I '{}' sed -i -e "s/JWT_SECRET_KEY=[a-zA-Z0-9_\-]*/JWT_SECRET_KEY={}/" ../auth_api/.env`
 
 	# установить HOST_UID = UID текущего пользователя. Это влияет на UID пользователя внутри контейнера.
 	# Нужно для совместимости прав доступа к сгенерированным файлам у хостового пользователя
@@ -48,11 +45,11 @@ env_dev_setup:	## настроить переменные development окруж
 	# Хак! Я не знаю, как правильно сматчить GroupID между
 	# 	   MacOS (host) и Linux (docker os)
 	@if [[ $(OS) = 'Darwin' ]]; then \
-		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
-		`sed -i '' 's/HOST_GID=.*/HOST_GID=61/' ../.env`; \
+		`id -u | xargs -I '{}' sed -i "s/HOST_UID=.*/HOST_UID={}/" ../.env`; \
+		`sed -i "s/HOST_GID=.*/HOST_GID=61/" ../.env`; \
 	else \
-		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
-		`id -g | xargs -I '{}' sed -i '' 's/HOST_GID=.*/HOST_GID={}/' ../.env`; \
+		`id -u | xargs -I '{}' sed -i "s/HOST_UID=.*/HOST_UID={}/" ../.env`; \
+		`id -g | xargs -I '{}' sed -i "s/HOST_GID=.*/HOST_GID={}/" ../.env`; \
   	fi
 
 .PHONY: env_dev_setup
@@ -130,16 +127,14 @@ redis/redis_waiting_for_readiness:	## ожидать готовности Redis
 #
 
 env_test_setup:		## настроить переменные окружения для тестового контура
-	@cp ../api/.env.test.example ../api/.env
+	@cp ../auth_api/.env.test.example ../auth_api/.env
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 
-	# сгенерировать рандомные пароли для PostgreSQL
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i -e "s/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/" ../auth_api/.env`
+	`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i -e "s/JWT_SECRET_KEY=[a-zA-Z0-9_\-]*/JWT_SECRET_KEY={}/" ../auth_api/.env`
 .PHONY: env_setup
 
 auth_api_test/destroy:		## остановить/удалить контейнеры для тестов и очистить тестовые данные
