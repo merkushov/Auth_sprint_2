@@ -130,13 +130,13 @@ redis/redis_waiting_for_readiness:	## ожидать готовности Redis
 #
 
 env_test_setup:		## настроить переменные окружения для тестового контура
-	@cp ../api/.env.test.example ../api/.env
+	@cp ../auth_api/.env.test.example ../auth_api/.env
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9_\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
+	`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i "s/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/" ../auth_api/.env`
+	`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i "s/JWT_SECRET_KEY=[a-zA-Z0-9_\-]*/JWT_SECRET_KEY={}/" ../auth_api/.env`
 .PHONY: env_setup
 
 auth_api_test/destroy:		## остановить/удалить контейнеры для тестов и очистить тестовые данные
