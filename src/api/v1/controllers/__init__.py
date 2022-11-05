@@ -3,6 +3,7 @@ from functools import lru_cache
 from api.v1.controllers.access_history import AccessHistoryController
 from api.v1.controllers.auth import AuthController
 from api.v1.controllers.health_check import HealthCheckController
+from api.v1.controllers.oauth import OAuthController
 from api.v1.controllers.role import RoleController
 from api.v1.controllers.user import UserController
 
@@ -11,6 +12,9 @@ from api.v1.controllers.user import UserController
 def get_auth_controller() -> AuthController:
     return AuthController()
 
+@lru_cache
+def get_oauth_controller() -> OAuthController:
+    return OAuthController()
 
 @lru_cache
 def get_health_check_controller() -> HealthCheckController:

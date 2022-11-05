@@ -7,13 +7,50 @@ def init_routes(app: Flask):
     api = Blueprint("api", __name__, url_prefix="/api")
     api_v1 = Blueprint("v1", __name__, url_prefix="/v1")
 
-    setup_v1_routes(api_v1)
+    setup_base_routes(api_v1)
+    setup_oauth_routes(api_v1)
 
     api.register_blueprint(api_v1)
     app.register_blueprint(api)
 
+def setup_oauth_routes(api: Blueprint):
+    """Добавить OAuth эндпоинты в целевое АПИ"""
 
-def setup_v1_routes(api_v1: Blueprint):
+    # Регистрация путей
+    api.add_url_rule(
+        "/login/yandex/authorize",
+        "Yandex OAuth2 login Hand-Shake",
+        view_func=api_v1_c.get_oauth_controller().yandex_authorize,
+        methods=[
+            "POST",
+        ],
+    )
+    api.add_url_rule(
+        "/login/yandex",
+        "Get Yandex OAuth2 login handle",
+        view_func=api_v1_c.get_oauth_controller().yandex,
+        methods=[
+            "GET",
+        ],
+    )
+    api.add_url_rule(
+        "/login/google",
+        "Get Google OAuth2 login dialog",
+        view_func=api_v1_c.get_oauth_controller().google,
+        methods=[
+            "GET",
+        ],
+    )
+    api.add_url_rule(
+        "/login/facebook",
+        "Get Facebook OAuth2 login dialog",
+        view_func=api_v1_c.get_oauth_controller().facebook,
+        methods=[
+            "GET",
+        ],
+    )
+
+def setup_base_routes(api_v1: Blueprint):
     api_v1.add_url_rule(
         "/ping",
         "ping",
