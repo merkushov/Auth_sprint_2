@@ -34,15 +34,11 @@ class AuthController:
         user = self.user_service.get_user(username=user_input_data.username)
         self.user_service.validate_password(user, user_input_data.password)
 
-        token_pair = self.jwt_service.create_token_pair(user=user)
-
-        self.user_service.create_access_history(user, request.headers["User-Agent"])
-        self.jwt_service.store_refresh_token(token_pair.refresh)
-
-        return {
-            "access": token_pair.access.encoded_token,
-            "refresh": token_pair.refresh.encoded_token,
-        }, status.OK
+        auth_method_stamp = " : Password validated"
+        self.user_service.create_access_history(user, 
+            request.headers["User-Agent"] + auth_method_stamp
+        )
+        return self.auth_service.issue_tokens(user)
 
     def register_user(self):
         """Зарегистрировать нового пользователя."""

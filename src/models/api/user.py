@@ -37,7 +37,9 @@ class InputUpdateUser(BaseServiceModel):
 
 
 class InputLoginUser(BaseUser):
+    username: Optional[constr(max_length=256)]
     email: Optional[EmailStr]
+    password: Optional[constr(max_length=256)]
 
     class Config:
         custom_exception = exc.ApiValidationErrorException
