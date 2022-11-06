@@ -1,7 +1,8 @@
 
-from flask import request, url_for, redirect
+from flask import request, url_for
 
 from auth import oauth
+from models.api.user import InputCreateProviderUser, User
 from services import UserService, get_user_service
 from services import AuthService, get_auth_service
 
@@ -48,15 +49,28 @@ class OAuthController:
         #           }}, method='Yandex')
 
     def google(self):
-        """Логин пользователя через Google Oauth2."""
-        
-        """Данные универсального логина после привязки аккаунта к базе"""
-        user_input_data = InputLoginUser.parse_obj({
-            'username': 'ilya3',
-            'email': 'from@gmail.com',
-        })
+        """
+        Логин пользователя через Google Oauth2.
+        Эндпоинт редиректит пользователя на форму авторизации Google.
+        """
 
-        user = self.user_service.get_user(username=user_input_data.username)
+        redirect_uri = url_for('google_authorize', _external=True)
+        return oauth.google.authorize_redirect(redirect_uri)
+
+    def google_authorize(self):
+        """Получение подтверждения от провайдера и выдача токенов"""
+
+        token = oauth.google.authorize_access_token()
+        user_info = token['userinfo']
+
+        new_provider_user = InputCreateProviderUser(
+            email=user_info.get("email"),
+        )
+
+        user: User = self.user_service.get_user(username=new_provider_user.username)
+        if not user:
+            self.user_service.create_user(new_provider_user)
+
         return self.authorize(user, "Google")
 
     def facebook(self):

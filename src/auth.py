@@ -3,6 +3,7 @@ from authlib.integrations.flask_client import OAuth
 
 oauth = OAuth()
 
+
 def init_oauth(app):
     # Инициализация фласк-клиента после запроса службы
     oauth.init_app(app)
@@ -18,4 +19,14 @@ def init_oauth(app):
         authorize_params=None,
         api_base_url='https://api.yandex.ru/',
         client_kwargs={'scope': 'openid login email'},
+    )
+
+    oauth.register(
+        name='google',
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={
+            'scope': 'openid email profile'
+        },
+        client_id=app.config.get("OAUTH2_GOOGLE_CLIENT_ID"),
+        client_secret=app.config.get("OAUTH2_GOOGLE_CLIENT_SECRET"),
     )
