@@ -21,10 +21,10 @@ class UserService:
         self.user_storage = user_storage
         self.role_storage = role_storage
 
-    def get_user(self, username: str) -> User:
+    def get_user(self, **user_kwargs) -> User:
         """Найти пользователя по имени."""
 
-        db_user = self.user_storage.get_user(username=username)
+        db_user = self.user_storage.get_user(**user_kwargs)
 
         user = User.from_orm(db_user)
 
