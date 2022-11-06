@@ -20,7 +20,7 @@ class IUserStorage:
 
     @abc.abstractmethod
     def get_user(
-        self, id: Optional[str] = None, username: Optional[str] = None
+        self, id: Optional[str] = None, username: Optional[str] = None, **user_kwargs
     ) -> User:
         """Получить данные пользователе."""
 
@@ -101,11 +101,12 @@ class PostgresUserStorage(IUserStorage):
         self,
         id: Optional[UUID] = None,
         username: Optional[str] = None,
+        **user_kwargs,
     ) -> User:
         if id:
-            user_from_db = User.query.filter(User.id == id).first()
+            user_from_db = User.query.get(id)
         elif username:
-            user_from_db = User.query.filter(User.username == username).first()
+            user_from_db = User.query.filter_by(username=username, **user_kwargs).first()
 
         if not user_from_db:
             raise ApiUserNotFoundException
