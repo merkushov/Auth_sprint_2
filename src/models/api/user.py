@@ -16,7 +16,7 @@ class UserIDBase(BaseServiceModel):
 
 
 class BaseUser(BaseServiceModel):
-    username: constr(max_length=256)
+    username: constr(max_length=256) = 'Default username'
     email: EmailStr
     password: constr(max_length=256)
 
