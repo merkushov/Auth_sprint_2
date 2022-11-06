@@ -4,7 +4,7 @@ import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from pydantic import EmailStr, Field, constr
+from pydantic import EmailStr, Field, constr, root_validator
 
 import exceptions as exc
 from models.api.base import BaseServiceModel
@@ -24,6 +24,25 @@ class BaseUser(BaseServiceModel):
 class InputCreateUser(BaseUser):
     class Config:
         custom_exception = exc.ApiValidationErrorException
+
+
+class InputCreateProviderUser(InputCreateUser):
+
+    @root_validator
+    def populate_campaign_id(cls, values):
+        if not values.get("username") and not values.get("email"):
+            raise ValueError("One of two 'username' or 'email' fields must be specified")
+
+        if not values.get("username"):
+            email = values.get("email")
+            values["username"] = email[0 : email.index("@")]
+        elif not values.get("email"):
+            values["email"] = values.get("username") + "@localhost"
+
+        if not values.get("password"):
+            values["password"] = uuid4()
+
+        return values
 
 
 class InputUpdateUser(BaseServiceModel):

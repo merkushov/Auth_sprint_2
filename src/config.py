@@ -65,6 +65,10 @@ class Config(object):
     RATE_LIMIT_THRESHOLD_ANNON_PER_MINUTE = 30
     RATE_LIMIT_THRESHOLD_REGISTERED_PER_MINUTE = 50
 
+    # OAuth 2.0 Google
+    OAUTH2_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
+    OAUTH2_GOOGLE_CLIENT_SECRET = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
+
 
 class ProductionConfig(Config):
     """Конфиг для продакшена."""

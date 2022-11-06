@@ -42,6 +42,14 @@ def setup_oauth_routes(api: Blueprint):
         ],
     )
     api.add_url_rule(
+        "/login/google/authorize",
+        "Google OAuth2 login Hand-Shake",
+        view_func=api_v1_c.get_oauth_controller().google_authorize,
+        methods=[
+            "GET",
+        ],
+    )
+    api.add_url_rule(
         "/login/facebook",
         "Get Facebook OAuth2 login dialog",
         view_func=api_v1_c.get_oauth_controller().facebook,
