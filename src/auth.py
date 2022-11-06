@@ -29,3 +29,15 @@ def init_oauth(app):
         client_id=app.config.get("OAUTH2_GOOGLE_CLIENT_ID"),
         client_secret=app.config.get("OAUTH2_GOOGLE_CLIENT_SECRET"),
     )
+
+    oauth.register(
+        name='facebook',
+        client_id=app.config.get('FACEBOOK_CLIENT_ID'),
+        client_secret=app.config.get('FACEBOOK_CLIENT_SECRET'),
+        access_token_url=app.config.get('FACEBOOK_ACCESS_TOKEN_URL'),
+        access_token_params=app.config.get('FACEBOOK_ACCESS_TOKEN_PARaMS'),
+        authorize_url=app.config.get('FACEBOOK_AUTHORIZE_URL'),
+        authorize_params=app.config.get('FACEBOOK_AUTHORIZE_URL'),
+        api_base_url=app.config.get('FACEBOOK_API_BASE_URL'),
+        client_kwargs=app.config.get('FACEBOOK_CLIENT_KWARGS'),
+    )
