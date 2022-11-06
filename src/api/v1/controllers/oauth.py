@@ -23,7 +23,7 @@ class OAuthController:
         """Авторизация и выдача токенов доступа после универсального логина"""
 
         auth_method_stamp = f" : {user.email} {method} OAuth2"
-        self.user_service.create_access_history(user, 
+        self.user_service.create_access_history(user,
             request.headers["User-Agent"] + auth_method_stamp
         )
         token_pair = self.auth_service.issue_tokens(user)
@@ -38,7 +38,7 @@ class OAuthController:
 
         redirect_uri = url_for('api.v1.yandex_authorize', _external=True)
         return self.oauth.yandex.authorize_redirect(redirect_uri)
-    
+
     def yandex_authorize(self):
         """Получение подтверждения от провайдера и выдача токенов"""
 
@@ -64,7 +64,7 @@ class OAuthController:
 
         redirect_uri = url_for('google_authorize', _external=True)
         return oauth.google.authorize_redirect(redirect_uri)
-    
+
     def universal(self, provider_authorize):
         redirect_uri = url_for(provider_authorize, _external=True)
 
@@ -96,3 +96,4 @@ class OAuthController:
 
         user = self.user_service.get_user(username=user_input_data.username)
         return self.authorize(user, "Facebook")
+
