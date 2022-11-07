@@ -38,7 +38,13 @@ class AuthController:
         self.user_service.create_access_history(user, 
             request.headers["User-Agent"] + auth_method_stamp
         )
-        return self.auth_service.issue_tokens(user)
+
+        token_pair = self.auth_service.issue_tokens(user)
+
+        return {
+            "access": token_pair.access.encoded_token,
+            "refresh": token_pair.refresh.encoded_token,
+        }, status.OK
 
     def register_user(self):
         """Зарегистрировать нового пользователя."""

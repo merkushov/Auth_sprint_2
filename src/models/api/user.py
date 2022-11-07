@@ -40,7 +40,7 @@ class InputCreateProviderUser(InputCreateUser):
             values["email"] = values.get("username") + "@localhost"
 
         if not values.get("password"):
-            values["password"] = uuid4()
+            values["password"] = 'password'
 
         return values
 

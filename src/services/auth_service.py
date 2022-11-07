@@ -1,5 +1,3 @@
-from http import HTTPStatus as status
-
 from models.api.tokens import RefreshToken, TokenPair
 from services.jwt_service import JWTService
 from storage import IBlackListStorage
@@ -32,10 +30,7 @@ class AuthService:
         token_pair = self.jwt_service.create_token_pair(user=user)
         self.jwt_service.store_refresh_token(token_pair.refresh)
 
-        return {
-            "access": token_pair.access.encoded_token,
-            "refresh": token_pair.refresh.encoded_token,
-        }, status.OK
+        return token_pair
 
     def refresh_token(self, encoded_refresh_token: str) -> TokenPair:
         """Обновить пару токенов access и refresh токены по refresh токену.

@@ -1,5 +1,5 @@
-
 from flask import request, url_for
+from http import HTTPStatus as status
 
 from auth import oauth
 from models.api.user import InputCreateProviderUser, User
@@ -26,27 +26,35 @@ class OAuthController:
         self.user_service.create_access_history(user, 
             request.headers["User-Agent"] + auth_method_stamp
         )
-        return self.auth_service.issue_tokens(user)
+        token_pair = self.auth_service.issue_tokens(user)
+
+        return {
+            "access": token_pair.access.encoded_token,
+            "refresh": token_pair.refresh.encoded_token,
+        }, status.OK
 
     def yandex(self):
         """Логин пользователя через Яндекс Oauth2."""
 
-        redirect_uri = url_for('api/v1/login/authorize/yandex')
-        return self.oauth.yandex.authorize_redirect(request, redirect_uri)
+        redirect_uri = url_for('api.v1.yandex_authorize', _external=True)
+        return self.oauth.yandex.authorize_redirect(redirect_uri)
     
     def yandex_authorize(self):
         """Получение подтверждения от провайдера и выдача токенов"""
 
-        token = self.oauth.yandex.authorize_access_token(request)
-        resp = self.oauth.yandex.get('email', token=token)
+        token = self.oauth.yandex.authorize_access_token()
+        resp = self.oauth.yandex.get('login:email', token=token)
         resp.raise_for_status()
-        email = resp.json()
-        return email
 
-        # return self.authorize(
-        #     user={{
-        #     'email': email,
-        #           }}, method='Yandex')
+        new_provider_user = InputCreateProviderUser(
+            email=resp.json(),
+        )
+
+        user: User = self.user_service.get_user(username=new_provider_user.username)
+        if not user:
+            self.user_service.create_user(new_provider_user)
+
+        return self.authorize(user, "Yandex")
 
     def google(self):
         """
@@ -56,6 +64,10 @@ class OAuthController:
 
         redirect_uri = url_for('google_authorize', _external=True)
         return oauth.google.authorize_redirect(redirect_uri)
+    
+    def universal(self, provider_authorize):
+        redirect_uri = url_for(provider_authorize, _external=True)
+
 
     def google_authorize(self):
         """Получение подтверждения от провайдера и выдача токенов"""
