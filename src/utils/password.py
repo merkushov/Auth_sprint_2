@@ -1,6 +1,6 @@
 import hashlib
-import string
 import random
+import string
 
 from config import app_config
 
@@ -15,4 +15,4 @@ def password_hash(password):
 def random_password():
     alphabet = string.digits + string.ascii_letters
     password = ''.join(random.choice(alphabet) for _ in range(20))
-    return password_hash(password)
+    return password
