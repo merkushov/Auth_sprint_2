@@ -3,6 +3,7 @@ from typing import Optional
 from uuid import UUID
 
 import sqlalchemy as sa
+from sqlalchemy import and_
 
 import exceptions as exc
 from db import db
@@ -12,7 +13,7 @@ from exceptions import (
     ApiUserAlreadyExistsException,
     ApiUserNotFoundException,
 )
-from models.db.auth_model import LoginHistory, Role, User
+from models.db.auth_model import LoginHistory, Role, SocialAccount, User
 
 
 class IUserStorage:
@@ -20,7 +21,7 @@ class IUserStorage:
 
     @abc.abstractmethod
     def get_user(
-        self, id: Optional[str] = None, username: Optional[str] = None, **user_kwargs
+        self, **user_kwargs
     ) -> User:
         """Получить данные пользователе."""
 
@@ -55,6 +56,10 @@ class IUserStorage:
     @abc.abstractmethod
     def delete_user_role(self, user: User, role: Role) -> None:
         """Удалить Роль Пользователю."""
+
+    @abc.abstractmethod
+    def get_user_by_social_id(self, *args, **kwargs):
+        """Получить пользователя по данным социального сервиса."""
 
 
 class PostgresUserStorage(IUserStorage):
@@ -103,15 +108,29 @@ class PostgresUserStorage(IUserStorage):
         username: Optional[str] = None,
         **user_kwargs,
     ) -> User:
+
         if id:
             user_from_db = User.query.get(id)
         elif username:
-            user_from_db = User.query.filter_by(username=username, **user_kwargs).first()
+            user_from_db = User.query.filter_by(username=username).first()
+        elif user_kwargs:
+            user_from_db = User.query.filter_by(**user_kwargs).first()
+        else:
+            user_from_db = None
 
         if not user_from_db:
             raise ApiUserNotFoundException
 
         return user_from_db
+
+    def get_user_by_social_id(self, social_name, social_id):
+        return db.session.query(
+            User
+        ).join(
+            SocialAccount, SocialAccount.user_id == User.id
+        ).where(
+            and_(SocialAccount.social_name == social_name, SocialAccount.social_id == social_id)
+        ).one_or_none()
 
     def get_user_history(self, user_id: UUID) -> list[LoginHistory]:
         """Получить данные из login_history по ключу user_id."""

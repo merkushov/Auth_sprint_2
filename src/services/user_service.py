@@ -125,3 +125,6 @@ class UserService:
         self.user_storage.delete_user_role(user=db_user, role=db_role)
 
         return None
+
+    def get_user_by_social_id(self, social_name, social_id):
+        return self.user_storage.get_user_by_social_id(social_name=social_name, social_id=social_id)

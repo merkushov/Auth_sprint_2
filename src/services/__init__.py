@@ -3,11 +3,13 @@ from functools import lru_cache
 from services.auth_service import AuthService
 from services.jwt_service import JWTService
 from services.role_service import RoleService
+from services.social_service import SocialAccountService
 from services.user_service import UserService
 from storage import (
     get_black_list_storage,
     get_jwt_storage,
     get_role_storage,
+    get_social_storage,
     get_user_storage,
 )
 
@@ -37,3 +39,7 @@ def get_user_service() -> UserService:
 @lru_cache
 def get_role_service() -> RoleService:
     return RoleService(role_storage=get_role_storage())
+
+@lru_cache()
+def get_social_account_service() -> SocialAccountService:
+    return SocialAccountService(social_storage=get_social_storage())

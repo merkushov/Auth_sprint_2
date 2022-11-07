@@ -1,11 +1,13 @@
 """Модели для SQLAlchemy."""
 
 import datetime
+import enum
 import uuid
 
 from sqlalchemy import DateTime
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import UUIDType
+from sqlalchemy_utils import ChoiceType, UUIDType
 
 from db import db
 
@@ -13,6 +15,13 @@ from db import db
 # more info needed before turning this one as it possibly
 # slows down the app if False
 UUIDType.cache_ok = False
+
+
+class SocialType(enum.Enum):
+    FB = 0
+    GOOGLE = 1
+    YANDEX = 2
+    SELF = 3
 
 
 def generate_uuid():
@@ -38,6 +47,8 @@ class LoginHistory(Base):
     user_id = db.Column(UUIDType(binary=False), index=True)
     info = db.Column(db.Text(), nullable=True)
     created_at = db.Column(DateTime, default=datetime.datetime.utcnow)
+    # partitioning
+    #
 
 
 class RefreshJwt(Base):
@@ -47,7 +58,6 @@ class RefreshJwt(Base):
 
     id = db.Column(UUIDType(binary=False), primary_key=True, default=generate_uuid)
     user_id = db.Column(UUIDType(binary=False), index=True, primary_key=True)
-    # refresh_token = db.Column(db.Text(), unique=True)
     expire = db.Column(DateTime)
 
 
@@ -84,6 +94,26 @@ class User(Base):
     email = db.Column(db.Text(), index=True, unique=True)
     password_hash = db.Column(db.Text())
     roles = relationship("Role", secondary=user_role)
+    social_accounts = relationship('SocialAccount')
 
     def __repr__(self):
         return f"<User {self.username}>"
+
+
+class SocialAccount(Base):
+    """История входов через социальные сервисы."""
+    __tablename__ = 'social_account'
+    __table_args__ = (db.UniqueConstraint('social_id', 'social_name', name='social_pk'),)
+
+    id = db.Column(UUIDType(binary=False), primary_key=True, default=generate_uuid)
+
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user = db.relationship(User, backref=db.backref('social_accounts', lazy=True))
+
+    social_id = db.Column(db.Text, nullable=False)
+    social_name = db.Column(
+        ChoiceType(SocialType, impl=db.Integer()),
+        comment="Тип социального сервиса",
+        nullable=False,
+    )
+
