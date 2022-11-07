@@ -9,6 +9,7 @@ from pydantic import EmailStr, Field, constr, root_validator
 import exceptions as exc
 from models.api.base import BaseServiceModel
 from models.api.role import Role
+from utils.password import random_password
 
 
 class UserIDBase(BaseServiceModel):
@@ -40,7 +41,7 @@ class InputCreateProviderUser(InputCreateUser):
             values["email"] = values.get("username") + "@localhost"
 
         if not values.get("password"):
-            values["password"] = 'password'
+            values["password"] = random_password()
 
         return values
 
