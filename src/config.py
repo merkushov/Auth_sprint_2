@@ -69,6 +69,10 @@ class Config(object):
     OAUTH2_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
     OAUTH2_GOOGLE_CLIENT_SECRET = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
 
+    # OAuth 2.0 Google
+    OAUTH2_YANDEX_CLIENT_ID = os.environ.get("OAUTH_YANDEX_CLIENT_ID")
+    OAUTH2_YANDEX_CLIENT_SECRET = os.environ.get("OAUTH_YANDEX_CLIENT_SECRET")
+
 
 class ProductionConfig(Config):
     """Конфиг для продакшена."""
