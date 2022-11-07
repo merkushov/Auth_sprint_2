@@ -32,7 +32,7 @@ def event_loop():
 def make_get_request(session):
     async def inner(method: str, params: dict = None) -> HTTPResponse:
         params = params or {}
-        url = settings.SERVICE_URL + "/v1" + method
+        url = settings.SERVICE_URL + "/api/v1" + method
         async with session.get(url, params=params) as response:
             return HTTPResponse(
                 body=await response.json(),
