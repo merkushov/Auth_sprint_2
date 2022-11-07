@@ -1,9 +1,8 @@
-from flask import request, url_for
+from flask import url_for
 
-from auth import oauth
-from services import UserService, get_user_service
-from services import AuthService, get_auth_service
 from api.v1.controllers.oauth.base import OAuthController
+from auth import oauth
+from services import AuthService, UserService, get_auth_service, get_user_service
 
 
 class YandexOAuthController(OAuthController):
@@ -17,7 +16,7 @@ class YandexOAuthController(OAuthController):
 
     @property
     def redirect_url(self):
-        return "api/v1/login/yandex/authorize" # TODO: взять урл из роутинга
+        return url_for('yandex_authorize')
 
     @property
     def oauth_provider(self):
@@ -26,3 +25,7 @@ class YandexOAuthController(OAuthController):
     @property
     def oauth_provider_stamp(self):
         return "Yandex"
+
+    @property
+    def email_field(self) -> str:
+        return 'login:email'

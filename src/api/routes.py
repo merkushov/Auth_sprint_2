@@ -12,13 +12,14 @@ def init_routes(app: Flask):
     api.register_blueprint(api_v1)
     app.register_blueprint(api)
 
+
 def setup_v1_routes(api_v1: Blueprint):
 
     # Добавить OAuth эндпоинты в целевое АПИ
     api_v1.add_url_rule(
         "/login/yandex",
         "yandex",
-        view_func=api_v1_c.get_oauth_controller().yandex,
+        view_func=api_v1_c.get_yandex_oauth_controller().login,
         methods=[
             "GET",
         ],
@@ -26,15 +27,15 @@ def setup_v1_routes(api_v1: Blueprint):
     api_v1.add_url_rule(
         "/login/yandex/authorize",
         "yandex_authorize",
-        view_func=api_v1_c.get_oauth_controller().yandex_authorize,
+        view_func=api_v1_c.get_yandex_oauth_controller().callback,
         methods=[
-            "GET",
+            "POST",
         ],
     )
     api_v1.add_url_rule(
         "/login/google",
         "google",
-        view_func=api_v1_c.get_oauth_controller().google,
+        view_func=api_v1_c.get_google_oauth_controller().login,
         methods=[
             "GET",
         ],
@@ -42,17 +43,25 @@ def setup_v1_routes(api_v1: Blueprint):
     api_v1.add_url_rule(
         "/login/google/authorize",
         "google_authorize",
-        view_func=api_v1_c.get_oauth_controller().google_authorize,
+        view_func=api_v1_c.get_google_oauth_controller().callback,
+        methods=[
+            "POST",
+        ],
+    )
+    api_v1.add_url_rule(
+        "/login/facebook",
+        "facebook",
+        view_func=api_v1_c.get_fb_oauth_controller().login,
         methods=[
             "GET",
         ],
     )
     api_v1.add_url_rule(
-        "/login/facebook",
-        "Get Facebook OAuth2 login dialog",
-        view_func=api_v1_c.get_oauth_controller().facebook,
+        "/login/facebook/authorize",
+        "facebook_authorize",
+        view_func=api_v1_c.get_fb_oauth_controller().callback(),
         methods=[
-            "GET",
+            "POST",
         ],
     )
 
