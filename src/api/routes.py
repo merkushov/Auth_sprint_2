@@ -59,7 +59,7 @@ def setup_v1_routes(api_v1: Blueprint):
     api_v1.add_url_rule(
         "/login/facebook/authorize",
         "facebook_authorize",
-        view_func=api_v1_c.get_fb_oauth_controller().callback(),
+        view_func=api_v1_c.get_fb_oauth_controller().callback,
         methods=[
             "GET",
         ],
