@@ -29,7 +29,7 @@ def setup_v1_routes(api_v1: Blueprint):
         "yandex_authorize",
         view_func=api_v1_c.get_yandex_oauth_controller().callback,
         methods=[
-            "POST",
+            "GET",
         ],
     )
     api_v1.add_url_rule(
@@ -45,7 +45,7 @@ def setup_v1_routes(api_v1: Blueprint):
         "google_authorize",
         view_func=api_v1_c.get_google_oauth_controller().callback,
         methods=[
-            "POST",
+            "GET",
         ],
     )
     api_v1.add_url_rule(
@@ -61,7 +61,7 @@ def setup_v1_routes(api_v1: Blueprint):
         "facebook_authorize",
         view_func=api_v1_c.get_fb_oauth_controller().callback(),
         methods=[
-            "POST",
+            "GET",
         ],
     )
 
@@ -69,7 +69,9 @@ def setup_v1_routes(api_v1: Blueprint):
         "/ping",
         "ping",
         view_func=api_v1_c.get_health_check_controller().ping,
-        methods=["GET"],
+        methods=[
+            "GET"
+        ],
     )
 
     api_v1.add_url_rule(
