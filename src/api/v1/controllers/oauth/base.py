@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
+from logging import getLogger
 
 from flask import request
 
@@ -15,8 +16,13 @@ from services import (
     get_user_service,
 )
 
+logger = getLogger(__name__)
 
 class OAuthController(ABC):
+    email_field: str = None
+    oauth_provider_stamp: str = None
+    username_field: str = None
+
     def __init__(
             self,
             user_service: UserService = get_user_service(),
@@ -44,29 +50,39 @@ class OAuthController(ABC):
         """URL для редиректа после аутентификации."""
         pass
 
-    @property
     @abstractmethod
-    def email_field(self) -> str:
-        """Название поля, по которому можно получить email."""
+    def _get_social_data(self, *args, **kwargs):
+        """Получение идентификатора пользователя и провайдера"""
+
+    @abstractmethod
+    def _get_user_info(self, *args):
+        """Получение user_info"""
 
     def login(self):
-        """Логин пользователя через Яндекс Oauth2."""
-        return self.oauth_provider.authorize_redirect(self.redirect_url)
+        """Логин пользователя через Oauth2."""
+        return self.oauth_provider.authorize_redirect(redirect_uri=self.redirect_url)
 
     def callback(self):
         """Получение подтверждения от провайдера и выдача токенов."""
 
         token = self.oauth_provider.authorize_access_token()
-        user_info = token['userinfo']
+
+        social_id, social_name = self._get_social_data(token)
+        user_info: dict = ...
+        # logger.error(token)
+        # logger.warning(token)
+        # logger.info(token)
+        # user_info = token['userinfo']
 
         new_provider_user = InputCreateProviderUser(
             email=user_info.get(self.email_field),
+            username=user_info.get(self.username_field)
         )
         status_code = HTTPStatus.OK
 
         # если юзера нет в бд, то сгенерим для него пароль
         try:
-            usr = self.user_service.get_user_by_social_id(social_id=..., social_name=...)
+            usr = self.user_service.get_user_by_social_id(social_id=social_id, social_name=social_name)
         except ApiUserNotFoundException:
             usr = self.user_service.create_user(new_provider_user)
 

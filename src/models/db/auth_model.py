@@ -47,8 +47,6 @@ class LoginHistory(Base):
     user_id = db.Column(UUIDType(binary=False), index=True)
     info = db.Column(db.Text(), nullable=True)
     created_at = db.Column(DateTime, default=datetime.datetime.utcnow)
-    # partitioning
-    #
 
 
 class RefreshJwt(Base):

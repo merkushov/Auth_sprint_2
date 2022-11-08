@@ -6,6 +6,8 @@ from services import AuthService, UserService, get_auth_service, get_user_servic
 
 
 class YandexOAuthController(OAuthController):
+    oauth_provider_stamp = "Yandex"
+    email_field = 'login:email'
 
     def __init__(
             self,
@@ -16,16 +18,9 @@ class YandexOAuthController(OAuthController):
 
     @property
     def redirect_url(self):
-        return url_for('yandex_authorize')
+        return url_for('api.v1.yandex_authorize', _external=True)
 
     @property
     def oauth_provider(self):
         return oauth.yandex
 
-    @property
-    def oauth_provider_stamp(self):
-        return "Yandex"
-
-    @property
-    def email_field(self) -> str:
-        return 'login:email'
