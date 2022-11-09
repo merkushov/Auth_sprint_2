@@ -54,7 +54,10 @@ FROM base AS test
 
 USER root
 
+RUN apt-get install -y iputils-ping vim curl
+
 RUN mkdir ${APP_TEST}
+RUN chown ${USER}:${GROUP} ${APP_TEST}
 
 COPY --chown=${USER}:${GROUP} src ${APP_HOME}
 COPY --chown=${USER}:${GROUP} tests ${APP_TEST}
@@ -62,6 +65,8 @@ COPY --chown=${USER}:${GROUP} tests ${APP_TEST}
 USER ${USER}
 
 RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/test.txt"
+
+WORKDIR ${APP_HOME}
 
 # -----------------------------------------------------------------------------
 # development environment

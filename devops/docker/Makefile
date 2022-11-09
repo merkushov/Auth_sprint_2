@@ -35,6 +35,9 @@ env_dev_setup:	## настроить переменные development окруж
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 
+	# сгенерировать рандомные пароли для PostgreSQL
+	# `env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
+
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
 	@if [[ $(OS) = 'Windows_NT' ]]; then \
 		`env LC_CTYPE=C cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 32 | xargs -I '{}' sed -i -e "s/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/" ../auth_api/.env`; \
@@ -44,6 +47,7 @@ env_dev_setup:	## настроить переменные development окруж
 		`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`; \
 	fi
 	
+
 	# установить HOST_UID = UID текущего пользователя. Это влияет на UID пользователя внутри контейнера.
 	# Нужно для совместимости прав доступа к сгенерированным файлам у хостового пользователя
 
@@ -140,6 +144,8 @@ env_test_setup:		## настроить переменные окружения �
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 
+	# сгенерировать рандомные пароли для PostgreSQL
+	# `env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
 	@if [[ $(OS) = 'Windows_NT' ]]; then \
@@ -173,14 +179,21 @@ auth_api_test/redis_waiting_for_readiness:	## ожидать готовност�
 .PHONY: auth_api_test/redis_waiting_for_readiness
 
 auth_api_test/run:	## запустить функциональные тесты API
-	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_API_TEST) bash -c 'cd /usr/src/app_auth_api_tests/functional/ && PYTHONPATH=. pytest .'
-.PHONY: auth_api_test/run
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_AUTH_API_TEST) bash -c 'cd /usr/src/auth_app_tests/functional && PYTHONPATH=. pytest .'
+.PHONY: test/run
 
+auth_api_test/bash: 	## доступ в контейнер с тестами
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_AUTH_API_TEST) bash
+.PHONY: auth_api_test/bash
+
+auth_api_test/log:	## посмотреть логи контейнера с тестами Приложения
+	$(DOCKER_COMPOSE_TEST) logs --follow $(DOCKER_AUTH_API_TEST)
+.PHONY: auth_api_test/log
 
 #
 # Интеграционные тесты
 #
 
 auth_api_test/run_integration: 	## запустить интеграционные авто-тесты
-	$(DOCKER_COMPOSE) exec $(DOCKER_AUTH_API) bash -c 'cd /usr/src/auth_app/ && PYTHONPATH=./src pytest tests/integration/src'
-.PHONY: auth_api_test/run_integration
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_AUTH_API_TEST) bash -c 'cd /usr/src/auth_app_tests && PYTHONPATH=/usr/src/auth_app pytest integration/src'
+.PHONY: test
