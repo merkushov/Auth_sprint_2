@@ -124,13 +124,18 @@ class PostgresUserStorage(IUserStorage):
         return user_from_db
 
     def get_user_by_social_id(self, social_name, social_id):
-        return db.session.query(
+        user = db.session.query(
             User
         ).join(
             SocialAccount, SocialAccount.user_id == User.id
         ).where(
             and_(SocialAccount.social_name == social_name, SocialAccount.social_id == social_id)
         ).one_or_none()
+
+        if not user:
+            raise ApiUserNotFoundException
+
+        return user
 
     def get_user_history(self, user_id: UUID) -> list[LoginHistory]:
         """Получить данные из login_history по ключу user_id."""

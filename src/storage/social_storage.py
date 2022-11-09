@@ -25,8 +25,8 @@ class PostgresSocialAccountStorage(ISocialAccountStorage):
     def filter_soc_account(self, **sa_kwargs):
         return SocialAccount.query.filter_by(**sa_kwargs)
 
-    def create_soc_account(self, user_id, user, social_id, social_name):
-        soc_acc = SocialAccount(user_id=user_id, user=user, social_id=social_id, social_name=social_name)
+    def create_soc_account(self, user_id, social_id, social_name):
+        soc_acc = SocialAccount(user_id=user_id, social_id=social_id, social_name=social_name)
         db.session.add(soc_acc)
 
         db.session.commit()
