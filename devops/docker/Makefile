@@ -22,7 +22,7 @@ DOCKER_AUTH_API_TEST=auth_test_api
 DOCKER_AUTH_DB_TEST=auth_test_db
 DOCKER_AUTH_REDIS_TEST=auth_test_redis
 
-OS := $(shell uname)
+[[ -z "${OS}" ]] && OS := (shell uname) || OS="${OS}"
 .DEFAULT_GOAL := help
 
 help:	## список доступных команд
@@ -39,21 +39,31 @@ env_dev_setup:	## настроить переменные development окруж
 	# `env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
+	@if [[ $(OS) = 'Windows_NT' ]]; then \
+		`env LC_CTYPE=C cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 32 | xargs -I '{}' sed -i -e "s/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/" ../auth_api/.env`; \
+		`env LC_CTYPE=C cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 32 | xargs -I '{}' sed -i -e "s/JWT_SECRET_KEY=[a-zA-Z0-9_\-]*/JWT_SECRET_KEY={}/" ../auth_api/.env`; \
+	else \
+		`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`; \
+		`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`; \
+	fi
+	
 
 	# установить HOST_UID = UID текущего пользователя. Это влияет на UID пользователя внутри контейнера.
 	# Нужно для совместимости прав доступа к сгенерированным файлам у хостового пользователя
 
 	# Хак! Я не знаю, как правильно сматчить GroupID между
 	# 	   MacOS (host) и Linux (docker os)
+	#	   На Windows host также необходимо переформатирование команд (кавычки и т.д.)
 	@if [[ $(OS) = 'Darwin' ]]; then \
 		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
 		`sed -i '' 's/HOST_GID=.*/HOST_GID=61/' ../.env`; \
+	elif [[ $(OS) = 'Windows_NT' ]]; then \
+		`id -u | xargs -I '{}' sed -i "s/HOST_UID=.*/HOST_UID={}/" ../.env`; \
+		`id -g | xargs -I '{}' sed -i "s/HOST_GID=.*/HOST_GID={}/" ../.env`; \
 	else \
 		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
 		`id -g | xargs -I '{}' sed -i '' 's/HOST_GID=.*/HOST_GID={}/' ../.env`; \
-  	fi
+	fi
 
 .PHONY: env_dev_setup
 
@@ -138,9 +148,15 @@ env_test_setup:		## настроить переменные окружения �
 	# `env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 42 | xargs -I '{}' sed -i '' -e 's/POSTGRES_PASSWORD=[a-zA-Z0-9]*/POSTGRES_PASSWORD={}/' -e 's/DB_PASSWORD=[a-zA-Z0-9]*/DB_PASSWORD={}/' ../auth_api/.env ../auth_db/.env`
 
 	# сгенерировать рандомный SECRET_KEY и JWT_SECRET_KEY
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`
-	`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`
-.PHONY: env_setup
+	@if [[ $(OS) = 'Windows_NT' ]]; then \
+		`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i -e "s/SECRET_KEY=[a-zA-Z0-9_\-]*/SECRET_KEY={}/" ../auth_api/.env`; \
+		`env LC_CTYPE=C cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32 | xargs -I '{}' sed -i -e "s/JWT_SECRET_KEY=[a-zA-Z0-9_\-]*/JWT_SECRET_KEY={}/" ../auth_api/.env`; \
+	else \
+		`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/SECRET_KEY=[a-zA-Z0-9\-]*/SECRET_KEY={}/' ../auth_api/.env`; \
+		`env LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 32 | xargs -I '{}' sed -i '' 's/JWT_SECRET_KEY=[a-zA-Z0-9\-]*/JWT_SECRET_KEY={}/' ../auth_api/.env`; \
+	fi
+
+.PHONY: env_test_setup
 
 auth_api_test/destroy:		## остановить/удалить контейнеры для тестов и очистить тестовые данные
 	$(DOCKER_COMPOSE_TEST) down --volumes --remove-orphans
