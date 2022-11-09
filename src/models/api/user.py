@@ -29,7 +29,7 @@ class InputCreateUser(BaseUser):
 
 class InputCreateProviderUser(InputCreateUser):
 
-    @root_validator
+    @root_validator(pre=True)
     def populate_campaign_id(cls, values):
         if not values.get("username") and not values.get("email"):
             raise ValueError("One of two 'username' or 'email' fields must be specified")

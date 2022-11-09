@@ -1,15 +1,30 @@
+from typing import Optional
 from uuid import UUID
 
 import exceptions as exc
 from models.api.base import BaseServiceModel
-from models.db.auth_model import SocialType
 
 
-class InputSocialAccount(BaseServiceModel):
-    user_id: UUID
+class SocialData(BaseServiceModel):
     social_id: str
-    social_name: SocialType
+    social_name: str
 
     class Config:
         custom_exception = exc.ApiSocialAccountValidationException
-        use_enum_values = True
+
+
+class UserInfo(BaseServiceModel):
+    email: str
+    login: Optional[str]
+
+    class Config:
+        custom_exception = exc.ApiSocialAccountValidationException
+
+
+class ParsedToken(SocialData):
+    user_info: UserInfo
+
+
+class InputSocialAccount(SocialData):
+    user_id: UUID
+
