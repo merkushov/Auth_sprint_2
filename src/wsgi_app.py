@@ -1,7 +1,5 @@
 from gevent import monkey
-
-from app import create_app
-
 monkey.patch_all()
 
+from app import create_app
 app = create_app()

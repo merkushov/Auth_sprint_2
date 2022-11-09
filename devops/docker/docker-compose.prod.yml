@@ -2,4 +2,26 @@ version: "3.9"
 
 services:
   auth_api:
-    command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--reload", "wsgi_app:app"]
+    build:
+      args:
+        uid: ${HOST_UID}
+        gid: ${HOST_GID}
+      target: production
+    command: ["gunicorn", "--bind", "0.0.0.0:8000", "--reload", "wsgi_app:app"]
+
+    # command below should be used in production for ASGI uvicorn, but gevent.monkey can not patch our app
+    # command: ["gunicorn", "--bind", "0.0.0.0:8000", "--reload", "-k", "uvicorn.workers.UvicornWorker", "wsgi_app:app"]
+
+
+  auth_nginx:
+    image: nginx:1.19.2
+    container_name: yp_auth_nginx
+    volumes:
+      - ../auth_nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../auth_nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - auth_api
+    ports:
+      - "80:80"
+    networks:
+      - yp_network

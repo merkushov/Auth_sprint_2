@@ -12,6 +12,10 @@ help:	## список доступных команд
 # вызываем make находящийся в подкаталоге с настройками окружения
 SUBMAKE_DEVOPS=$(MAKE) --silent -C devops/docker
 
+## Production target с сервером Nginx и распределённой трассировкой
+prod/setup: export STAGE := prod
+prod/setup: dev/setup
+
 dev/setup:	## настроить инфраструктуру для разработки в Докере
 	$(SUBMAKE_DEVOPS) env_dev_setup
 	$(SUBMAKE_DEVOPS) docker/destroy
