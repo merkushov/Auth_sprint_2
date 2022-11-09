@@ -19,7 +19,10 @@ class DBSettings(BaseSettings):
 class CommonSettings(BaseSettings):
     PROJECT_NAME: str = "auth_api"
 
-    SERVICE_URL: str = "http://127.0.0.1:5000"
+    # SERVICE_URL: str = "http://127.0.0.1:5000"
+
+    # для предпродакшн тестов
+    SERVICE_URL: str = "http://0.0.0.0:8000"
 
     # DB: DBSettings = DBSettings()
 
