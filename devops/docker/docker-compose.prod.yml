@@ -7,11 +7,7 @@ services:
         uid: ${HOST_UID}
         gid: ${HOST_GID}
       target: production
-    command: ["gunicorn", "--bind", "0.0.0.0:8000", "--reload", "wsgi_app:app"]
-
-    # command below should be used in production for ASGI uvicorn, but gevent.monkey can not patch our app
-    # command: ["gunicorn", "--bind", "0.0.0.0:8000", "--reload", "-k", "uvicorn.workers.UvicornWorker", "wsgi_app:app"]
-
+    command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--reload", "wsgi_app:app"]
 
   auth_nginx:
     image: nginx:1.19.2
