@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from http import HTTPStatus
 from logging import getLogger
 
-from flask import request
+from flask import Response, request
 
 from exceptions import ApiUserNotFoundException
-from models.api.social_account import InputSocialAccount
-from models.api.user import InputCreateProviderUser
+from models.api.social_account import InputSocialAccount, ParsedToken, UserInfo, OAuthProvider
+from models.api.user import InputCreateProviderUser, User
 from services import (
     AuthService,
     SocialAccountService,
@@ -18,10 +18,9 @@ from services import (
 
 logger = getLogger(__name__)
 
+
 class OAuthController(ABC):
-    email_field: str = None
-    oauth_provider_stamp: str = None
-    username_field: str = None
+    oauth_provider_stamp: OAuthProvider.name = None
 
     def __init__(
             self,
@@ -32,11 +31,6 @@ class OAuthController(ABC):
         self.user_service: UserService = user_service
         self.auth_service: AuthService = auth_service
         self.social_acc_service: SocialAccountService = social_acc_service
-
-    @property
-    @abstractmethod
-    def oauth_provider_stamp(self):
-        pass
 
     @property
     @abstractmethod
@@ -51,12 +45,8 @@ class OAuthController(ABC):
         pass
 
     @abstractmethod
-    def _get_social_data(self, *args, **kwargs):
-        """Получение идентификатора пользователя и провайдера"""
-
-    @abstractmethod
-    def _get_user_info(self, *args):
-        """Получение user_info"""
+    def _get_social_data(self, *args, **kwargs) -> ParsedToken:
+        """Получение идентификатора пользователя и провайдера."""
 
     def login(self):
         """Логин пользователя через Oauth2."""
@@ -66,42 +56,77 @@ class OAuthController(ABC):
         """Получение подтверждения от провайдера и выдача токенов."""
 
         token = self.oauth_provider.authorize_access_token()
+        logger.error(token)
 
-        social_id, social_name = self._get_social_data(token)
-        user_info: dict = ...
-        # logger.error(token)
-        # logger.warning(token)
-        # logger.info(token)
-        # user_info = token['userinfo']
+        parsed_token = self._get_social_data(token)
 
+        logger.error(parsed_token)
         new_provider_user = InputCreateProviderUser(
-            email=user_info.get(self.email_field),
-            username=user_info.get(self.username_field)
+            email=parsed_token.user_info.email,
         )
-        status_code = HTTPStatus.OK
 
-        # если юзера нет в бд, то сгенерим для него пароль
-        try:
-            usr = self.user_service.get_user_by_social_id(social_id=social_id, social_name=social_name)
-        except ApiUserNotFoundException:
-            usr = self.user_service.create_user(new_provider_user)
+        response, status_code = self.insert(new_provider_user=new_provider_user, parsed_token=parsed_token)
 
-            new_sa = InputSocialAccount(
-                user_id=usr.id,
-                social_id=self.oauth_provider.get('id_token'),
-                social_name=self.oauth_provider_stamp,
-            )
-            self.social_acc_service.create_soc_account(social_input=new_sa)
-            # при интеграции с фронтом, он будет отправлять пользователя на форму для обновления пароля при этом коде
-            status_code = HTTPStatus.CREATED
+        return Response(
+            response=response,
+            status=status_code
+        )
 
-        return self.authorize(user=usr), status_code
-
-    def authorize(self, user):
+    def authorize(self, user: User):
         """Авторизация и выдача токенов доступа после универсального логина."""
 
         auth_method_stamp = f" : {user.email} {self.oauth_provider_stamp} OAuth2"
         self.user_service.create_access_history(user,
                                                 request.headers["User-Agent"] + auth_method_stamp
                                                 )
-        return self.auth_service.issue_tokens(user)
+        return self.auth_service.issue_tokens(user).json()
+
+    def insert(self, parsed_token: ParsedToken, new_provider_user: InputCreateProviderUser):
+        try:
+            # проверим есть ли пользователь по идентификатору во внешнем сервисе
+            usr = self.user_service.get_user_by_social_id(
+                social_id=parsed_token.social_id, social_name=parsed_token.social_name
+            )
+            status_code = HTTPStatus.OK
+            response = self.authorize(user=usr)
+        except ApiUserNotFoundException:
+            try:
+                usr = self.user_service.get_user(email=new_provider_user.email)
+            except ApiUserNotFoundException:
+                # если такого пользователя нет, то создадим юзера и запись о входе через внешний сервис
+                response, status_code = self._create_user_with_social(
+                    new_provider_user=new_provider_user, parsed_token=parsed_token
+                )
+            else:
+                response, status_code = self._create_social(user=usr, parsed_token=parsed_token)
+
+        return response, status_code
+
+    def _create_user_with_social(self, new_provider_user: InputCreateProviderUser, parsed_token: ParsedToken):
+        """Создание пользователя и социального аккаунта"""
+        # если такого пользователя нет, то создадим юзера
+        user = self.user_service.create_user(user=new_provider_user)
+        return self._create_social(user=user, parsed_token=parsed_token)
+
+    def _create_social(self, user: User, parsed_token: ParsedToken):
+        """Проверка наличия наличия социального аккаунта, уже имеющегося email и username"""
+        # создадим запись о входе через внешний сервис
+        new_sa = InputSocialAccount(
+            user_id=user.id,
+            social_id=parsed_token.social_id,
+            social_name=parsed_token.social_name,
+        )
+        self.social_acc_service.create_soc_account(social_input=new_sa)
+        return self.authorize(user=user), HTTPStatus.CREATED
+
+
+class OpenIDOAuthController(OAuthController, ABC):
+    def _get_social_data(self, token, *args, **kwargs) -> ParsedToken:
+        user_info = token['userinfo']
+        return ParsedToken(
+            social_id=user_info['sub'],
+            social_name=self.oauth_provider_stamp,
+            user_info=UserInfo(
+                email=user_info['email'],
+            )
+        )

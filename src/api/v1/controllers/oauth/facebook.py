@@ -1,13 +1,13 @@
 from flask import url_for
 
-from api.v1.controllers.oauth.base import OAuthController
+from api.v1.controllers.oauth.base import OpenIDOAuthController
 from auth import oauth
 from services import AuthService, UserService, get_auth_service, get_user_service
+from models.api.social_account import OAuthProvider
 
 
-class FBOAuthController(OAuthController):
-    oauth_provider_stamp = "Facebook"
-    email_field = ...
+class FBOAuthController(OpenIDOAuthController):
+    oauth_provider_stamp = OAuthProvider.facebook.name
 
     def __init__(
             self,

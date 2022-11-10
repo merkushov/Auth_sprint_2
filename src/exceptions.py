@@ -151,6 +151,9 @@ class ApiTooManyRequestsException(ApiException):
     http_status_code = 429
     message = "Превышен лимит количества запросов"
 
+#
+# Social Account
+#
 
 class ApiSocialAccountValidationException(ApiInvalidParamsException):
     message = "Ошибка валидации социального аккаунта"

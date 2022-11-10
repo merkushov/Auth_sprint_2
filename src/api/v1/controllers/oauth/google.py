@@ -1,13 +1,13 @@
 from flask import url_for
 
-from api.v1.controllers.oauth.base import OAuthController
+from api.v1.controllers.oauth.base import OpenIDOAuthController
 from auth import oauth
 from services import AuthService, UserService, get_auth_service, get_user_service
+from models.api.social_account import OAuthProvider
 
 
-class GoogleOAuthController(OAuthController):
-    oauth_provider_stamp = "Google"
-    email_field = 'email'
+class GoogleOAuthController(OpenIDOAuthController):
+    oauth_provider_stamp = OAuthProvider.google.name
 
     def __init__(
             self,

@@ -111,6 +111,8 @@ class PostgresUserStorage(IUserStorage):
 
         if id:
             user_from_db = User.query.get(id)
+        elif email := user_kwargs.get('email'):
+            user_from_db = User.query.filter_by(email=email).first()
         elif username:
             user_from_db = User.query.filter_by(username=username).first()
         elif user_kwargs:

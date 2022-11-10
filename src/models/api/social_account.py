@@ -3,6 +3,14 @@ from uuid import UUID
 
 import exceptions as exc
 from models.api.base import BaseServiceModel
+from enum import Enum
+
+
+class OAuthProvider(Enum):
+    self = 0
+    yandex = 1
+    google = 2
+    facebook = 3
 
 
 class SocialData(BaseServiceModel):
