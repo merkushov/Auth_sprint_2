@@ -10,6 +10,7 @@ import exceptions as exc
 from models.api.base import BaseServiceModel
 from models.api.role import Role
 from utils.password import random_password
+from models.db.auth_model import db, User
 
 
 class UserIDBase(BaseServiceModel):
@@ -36,7 +37,13 @@ class InputCreateProviderUser(InputCreateUser):
 
         if not values.get("username"):
             email = values.get("email")
-            values["username"] = email[0 : email.index("@")]
+            username = email[0 : email.index("@")]
+            # чтобы не пересекались username
+            while db.session.query(User).where(User.username == username).one_or_none():
+                username += '1'
+
+            values['username'] = username
+
         elif not values.get("email"):
             values["email"] = values.get("username") + "@localhost"
 
