@@ -14,17 +14,23 @@ SUBMAKE_DEVOPS=$(MAKE) --silent -C devops/docker
 
 ## Production target с сервером Nginx и распределённой трассировкой
 prod/setup: export STAGE := prod
-prod/setup: dev/setup
+prod/setup: base/setup prod/env
+prod/env: 
+	$(SUBMAKE_DEVOPS) env_prod_setup
 
-dev/setup:	## настроить инфраструктуру для разработки в Докере
+## настроить инфраструктуру для разработки в Докере
+dev/setup:	
 	$(SUBMAKE_DEVOPS) env_dev_setup
+dev/setup: base/setup
+
+base/setup:
 	$(SUBMAKE_DEVOPS) docker/destroy
 	$(SUBMAKE_DEVOPS) docker/build
 	$(SUBMAKE_DEVOPS) docker/up
 	$(SUBMAKE_DEVOPS) redis/redis_waiting_for_readiness
 	$(SUBMAKE_DEVOPS) db/waiting_for_readiness
 	$(SUBMAKE_DEVOPS) auth_api/migrate
-.PHONY: dev/setup
+.PHONY: base/setup
 
 
 dev/up:	## поднять всю инфраструктуру для разработки в Докере

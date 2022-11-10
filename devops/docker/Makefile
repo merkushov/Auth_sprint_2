@@ -30,8 +30,15 @@ help:	## список доступных команд
 	@echo "(Other less used targets are available, open Makefile for details)"
 .PHONY: help
 
+env_prod_setup:	## настроить переменные production окружения
+	@cp ../auth_api/.env.prod.example ../auth_api/.env
+env_prod_setup: env_setup
+
 env_dev_setup:	## настроить переменные development окружения
 	@cp ../auth_api/.env.dev.example ../auth_api/.env
+env_dev_setup: env_setup
+
+env_setup:
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 

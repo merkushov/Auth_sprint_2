@@ -68,6 +68,11 @@ class Config(object):
 
 class ProductionConfig(Config):
     """Конфиг для продакшена."""
+    JAEGER_HOST = os.environ.get("JAEGER_HOST")
+    JAEGER_PORT = int(os.environ.get("JAEGER_PORT"))
+
+    WSGI_HOST = os.environ.get("WSGI_HOST")
+    WSGI_PORT = int(os.environ.get("WSGI_PORT"))
 
 
 class TestingConfig(Config):
