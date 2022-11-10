@@ -5,7 +5,12 @@ from logging import getLogger
 from flask import Response, request
 
 from exceptions import ApiUserNotFoundException
-from models.api.social_account import InputSocialAccount, ParsedToken, UserInfo, OAuthProvider
+from models.api.social_account import (
+    InputSocialAccount,
+    OAuthProvider,
+    ParsedToken,
+    UserInfo,
+)
 from models.api.user import InputCreateProviderUser, User
 from services import (
     AuthService,

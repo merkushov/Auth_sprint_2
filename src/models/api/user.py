@@ -9,8 +9,8 @@ from pydantic import EmailStr, Field, constr, root_validator
 import exceptions as exc
 from models.api.base import BaseServiceModel
 from models.api.role import Role
+from models.db.auth_model import User, db
 from utils.password import random_password
-from models.db.auth_model import db, User
 
 
 class UserIDBase(BaseServiceModel):

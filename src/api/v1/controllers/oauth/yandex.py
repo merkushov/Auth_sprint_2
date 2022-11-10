@@ -2,7 +2,7 @@ from flask import url_for
 
 from api.v1.controllers.oauth.base import OAuthController
 from auth import oauth
-from models.api.social_account import ParsedToken, UserInfo, OAuthProvider
+from models.api.social_account import OAuthProvider, ParsedToken, UserInfo
 from services import AuthService, UserService, get_auth_service, get_user_service
 
 

@@ -33,10 +33,9 @@ def init_oauth(app):
         name='facebook',
         client_id=app.config.get('FACEBOOK_CLIENT_ID'),
         client_secret=app.config.get('FACEBOOK_CLIENT_SECRET'),
-        access_token_url=app.config.get('FACEBOOK_ACCESS_TOKEN_URL'),
-        access_token_params=app.config.get('FACEBOOK_ACCESS_TOKEN_PARaMS'),
-        authorize_url=app.config.get('FACEBOOK_AUTHORIZE_URL'),
-        authorize_params=app.config.get('FACEBOOK_AUTHORIZE_URL'),
-        api_base_url=app.config.get('FACEBOOK_API_BASE_URL'),
-        client_kwargs=app.config.get('FACEBOOK_CLIENT_KWARGS'),
+        access_token_url='https://graph.facebook.com/oauth/access_token',
+        authorize_url='https://www.facebook.com/dialog/oauth',
+        api_base_url='https://graph.facebook.com/',
+        client_kwargs={'scope': 'openid email'},
+        server_metadata_url='https://www.facebook.com/.well-known/openid-configuration'
     )

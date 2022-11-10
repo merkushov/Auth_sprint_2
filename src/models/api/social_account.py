@@ -1,9 +1,9 @@
+from enum import Enum
 from typing import Optional
 from uuid import UUID
 
 import exceptions as exc
 from models.api.base import BaseServiceModel
-from enum import Enum
 
 
 class OAuthProvider(Enum):

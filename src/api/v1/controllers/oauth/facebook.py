@@ -2,8 +2,8 @@ from flask import url_for
 
 from api.v1.controllers.oauth.base import OpenIDOAuthController
 from auth import oauth
-from services import AuthService, UserService, get_auth_service, get_user_service
 from models.api.social_account import OAuthProvider
+from services import AuthService, UserService, get_auth_service, get_user_service
 
 
 class FBOAuthController(OpenIDOAuthController):

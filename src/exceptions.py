@@ -155,5 +155,6 @@ class ApiTooManyRequestsException(ApiException):
 # Social Account
 #
 
+
 class ApiSocialAccountValidationException(ApiInvalidParamsException):
     message = "Ошибка валидации социального аккаунта"
