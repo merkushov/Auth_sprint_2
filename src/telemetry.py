@@ -1,3 +1,4 @@
+import flask
 from functools import wraps
 
 
@@ -31,12 +32,13 @@ def init_tracer(app):
         return tracer
 
 # Декоратор для трассировки отдельных вызовов или подзапрсов
-def trace_export(span_name='span', env_name=None):
+def trace_export(span_name='span'):
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if env_name == 'production':
+            
+            if flask.current_app.config["FLASK_ENV"] == 'production':
                 from opentelemetry import trace
                 tracer = trace.get_tracer(__name__)
                 with tracer.start_as_current_span(span_name):

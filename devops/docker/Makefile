@@ -36,12 +36,12 @@ help:	## список доступных команд
 
 env_prod_setup:	## настроить переменные production окружения
 	@cp ../auth_api/.env.prod.example ../auth_api/.env
-env_prod_setup: env_setup
+	@make env_setup
 .PHONY: env_prod_etup
 
 env_dev_setup:	## настроить переменные development окружения
 	@cp ../auth_api/.env.dev.example ../auth_api/.env
-env_dev_setup: env_setup
+	@make env_setup
 .PHONY: env_dev_setup
 
 env_setup:

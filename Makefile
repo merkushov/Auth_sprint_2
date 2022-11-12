@@ -16,12 +16,12 @@ SUBMAKE_DEVOPS=$(MAKE) --silent -C devops/docker
 prod/setup: export STAGE := prod
 prod/setup:
 	$(SUBMAKE_DEVOPS) env_prod_setup
-prod/setup: base/setup
+	@make base/setup
 
 ## настроить инфраструктуру для разработки в Докере
-dev/setup:	
+dev/setup:
 	$(SUBMAKE_DEVOPS) env_dev_setup
-dev/setup: base/setup
+	@make base/setup
 
 base/setup:
 	$(SUBMAKE_DEVOPS) docker/destroy
