@@ -3,6 +3,7 @@ from functools import lru_cache
 from api.v1.controllers.access_history import AccessHistoryController
 from api.v1.controllers.auth import AuthController
 from api.v1.controllers.health_check import HealthCheckController
+from api.v1.controllers.oauth import FBOAuthController, YandexOAuthController
 from api.v1.controllers.role import RoleController
 from api.v1.controllers.user import UserController
 
@@ -10,6 +11,16 @@ from api.v1.controllers.user import UserController
 @lru_cache
 def get_auth_controller() -> AuthController:
     return AuthController()
+
+
+@lru_cache
+def get_yandex_oauth_controller() -> YandexOAuthController:
+    return YandexOAuthController()
+
+
+@lru_cache
+def get_fb_oauth_controller() -> FBOAuthController:
+    return FBOAuthController()
 
 
 @lru_cache

@@ -4,11 +4,13 @@ import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from pydantic import EmailStr, Field, constr
+from pydantic import EmailStr, Field, constr, root_validator
 
 import exceptions as exc
 from models.api.base import BaseServiceModel
 from models.api.role import Role
+from models.db.auth_model import User, db
+from utils.password import random_password
 
 
 class UserIDBase(BaseServiceModel):
@@ -16,7 +18,7 @@ class UserIDBase(BaseServiceModel):
 
 
 class BaseUser(BaseServiceModel):
-    username: constr(max_length=256)
+    username: constr(max_length=256) = 'Default username'
     email: EmailStr
     password: constr(max_length=256)
 
@@ -24,6 +26,31 @@ class BaseUser(BaseServiceModel):
 class InputCreateUser(BaseUser):
     class Config:
         custom_exception = exc.ApiValidationErrorException
+
+
+class InputCreateProviderUser(InputCreateUser):
+
+    @root_validator(pre=True)
+    def populate_campaign_id(cls, values):
+        if not values.get("username") and not values.get("email"):
+            raise ValueError("One of two 'username' or 'email' fields must be specified")
+
+        if not values.get("username"):
+            email = values.get("email")
+            username = email[0 : email.index("@")]
+            # чтобы не пересекались username
+            while db.session.query(User).where(User.username == username).one_or_none():
+                username += '1'
+
+            values['username'] = username
+
+        elif not values.get("email"):
+            values["email"] = values.get("username") + "@localhost"
+
+        if not values.get("password"):
+            values["password"] = random_password()
+
+        return values
 
 
 class InputUpdateUser(BaseServiceModel):
@@ -37,7 +64,9 @@ class InputUpdateUser(BaseServiceModel):
 
 
 class InputLoginUser(BaseUser):
+    username: Optional[constr(max_length=256)]
     email: Optional[EmailStr]
+    password: Optional[constr(max_length=256)]
 
     class Config:
         custom_exception = exc.ApiValidationErrorException

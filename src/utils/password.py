@@ -1,4 +1,6 @@
 import hashlib
+import random
+import string
 
 from config import app_config
 
@@ -8,3 +10,9 @@ def password_hash(password):
         password.encode("utf-8") + app_config.SECRET_KEY.encode("utf-8")
     ).hexdigest()
     return hashed_password
+
+
+def random_password():
+    alphabet = string.digits + string.ascii_letters
+    password = ''.join(random.choice(alphabet) for _ in range(20))
+    return password
