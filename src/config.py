@@ -9,6 +9,7 @@ load_dotenv()
 class Config(object):
     """Настройки приложения."""
 
+    APP_NAME = 'YP_Auth'
     BASE_DIR = Path(__file__).parent
     TESTING = False
     DEBUG = False
@@ -70,6 +71,7 @@ class ProductionConfig(Config):
     """Конфиг для продакшена."""
     JAEGER_HOST = os.environ.get("JAEGER_HOST")
     JAEGER_PORT = int(os.environ.get("JAEGER_PORT"))
+    JAEGER_UDP = int(os.environ.get("JAEGER_UDP"))
 
     WSGI_HOST = os.environ.get("WSGI_HOST")
     WSGI_PORT = int(os.environ.get("WSGI_PORT"))

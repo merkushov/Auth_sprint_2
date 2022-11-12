@@ -1,14 +1,33 @@
 from flask import request
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import get_default_span_name
+
 from gevent.pywsgi import WSGIServer
 from app import create_app
 
 app = create_app()
+jaeger_span = None
 
 @app.before_request
 def before_request():
+    global jaeger_span
+
     request_id = request.headers.get('X-Request-Id')
     if not request_id:
-        raise RuntimeError('X-Request-Id is required for client identification') 
+        raise RuntimeError('X-Request-Id is required for client identification')
+
+    tracer = trace.get_tracer(__name__)
+    jaeger_span = tracer.start_span(name='flask_auth')
+    jaeger_span.set_attribute('http.request_id', request_id)
+
+
+@app.after_request
+def after_request(response):
+    global jaeger_span
+
+    jaeger_span.end()
+    return response
+
 
 http_server = WSGIServer((app.config["WSGI_HOST"], app.config["WSGI_PORT"]), app)
 http_server.serve_forever()

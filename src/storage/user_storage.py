@@ -13,6 +13,7 @@ from exceptions import (
     ApiUserNotFoundException,
 )
 from models.db.auth_model import LoginHistory, Role, User
+from telemetry import trace_export
 
 
 class IUserStorage:
@@ -58,6 +59,7 @@ class IUserStorage:
 
 
 class PostgresUserStorage(IUserStorage):
+    @trace_export('db_create_user')
     def create_user(self, username: str, email: str, password_hash: str) -> User:
         user = User(username=username, email=email, password_hash=password_hash)
         db.session.add(user)
@@ -73,6 +75,7 @@ class PostgresUserStorage(IUserStorage):
 
         return user
 
+    @trace_export('db_update_user')
     def update_user(self, id: UUID, raw_data: dict) -> User:
         stmt = sa.update(User).filter(User.id == id).values(**raw_data)
 
@@ -86,6 +89,7 @@ class PostgresUserStorage(IUserStorage):
 
         return user
 
+    @trace_export('db_validate_user')
     def _user_credentials_validation(self, username: str, email: str) -> None:
         existed_user = self.get_user(username=username)
 
@@ -97,6 +101,7 @@ class PostgresUserStorage(IUserStorage):
         if user_from_db:
             raise ApiEmailInUseException
 
+    @trace_export('get_user')
     def get_user(
         self,
         id: Optional[UUID] = None,
@@ -112,6 +117,7 @@ class PostgresUserStorage(IUserStorage):
 
         return user_from_db
 
+    @trace_export('get_user_history')
     def get_user_history(self, user_id: UUID) -> list[LoginHistory]:
         """Получить данные из login_history по ключу user_id."""
 
@@ -124,6 +130,7 @@ class PostgresUserStorage(IUserStorage):
 
         return None
 
+    @trace_export('set_user_role')
     def set_user_role(self, role_name: str, user_name: str):
         role = db.session.query(Role).filter(Role.name == role_name).first()
 
@@ -139,12 +146,14 @@ class PostgresUserStorage(IUserStorage):
         db.session.add(user)
         db.session.commit()
 
+    @trace_export('add_user_role')
     def set_role_to_user(self, user: User, role: Role) -> None:
         user.roles.append(role)
         db.session.commit()
 
         return None
 
+    @trace_export('del_user_role')
     def delete_user_role(self, user: User, role: Role) -> None:
         user.roles.remove(role)
         db.session.commit()
