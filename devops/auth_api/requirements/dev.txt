@@ -1,5 +1,4 @@
 -r base.txt
--r test.txt
 
 flake8==4.0.1
 black==21.11b1
