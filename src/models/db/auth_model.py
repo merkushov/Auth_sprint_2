@@ -20,6 +20,32 @@ def generate_uuid():
     return uuid.uuid4()
 
 
+def create_partition_for_login_history(target, connection, **kwargs):
+    # предположим, что актуальными считаются записи за последнеи полгода
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS
+            auth.login_history_relevant
+        PARTITION OF auth.login_history
+        FOR VALUES FROM
+            (now() - interval '6 months')
+        TO
+            (now())
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS
+        auth.login_history_relevant
+        PARTITION OF auth.login_history
+        FOR VALUES FROM
+            (coalesce(min(created_at), now() - interval '6 months'))
+        TO
+            (now() - interval '6 months')
+        """
+    )
+
+
 class Base(db.Model):
     """Базовая модель."""
 
@@ -34,11 +60,16 @@ class LoginHistory(Base):
     """История входов пользователя."""
 
     __tablename__ = "login_history"
+    __table_args__ = {
+        **Base.__table_args__,
+        'postgresql_partition_by': 'RANGE (created_at)',
+        'listeners': [('after_create', create_partition_for_login_history)],
+    }
 
     id = db.Column(UUIDType(binary=False), primary_key=True, default=generate_uuid)
     user_id = db.Column(UUIDType(binary=False), index=True)
     info = db.Column(db.Text(), nullable=True)
-    created_at = db.Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = db.Column(DateTime, default=datetime.datetime.utcnow, primary_key=True)
 
 
 class RefreshJwt(Base):

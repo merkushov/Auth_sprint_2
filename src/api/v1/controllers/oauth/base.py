@@ -25,7 +25,7 @@ logger = getLogger(__name__)
 
 
 class OAuthController(ABC):
-    oauth_provider_stamp: OAuthProvider.name = None
+    oauth_provider_stamp: str = None
 
     def __init__(
             self,
