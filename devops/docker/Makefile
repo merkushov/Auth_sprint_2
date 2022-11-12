@@ -22,7 +22,11 @@ DOCKER_AUTH_API_TEST=auth_test_api
 DOCKER_AUTH_DB_TEST=auth_test_db
 DOCKER_AUTH_REDIS_TEST=auth_test_redis
 
-[[ -z "${OS}" ]] && OS := (shell uname) || OS="${OS}"
+#[[ -z "${OS}" ]] && OS := (shell uname) || OS="${OS}"
+
+ifeq ($(OS),)
+OS := (shell uname)
+endif
 .DEFAULT_GOAL := help
 
 help:	## список доступных команд
@@ -33,12 +37,15 @@ help:	## список доступных команд
 env_prod_setup:	## настроить переменные production окружения
 	@cp ../auth_api/.env.prod.example ../auth_api/.env
 env_prod_setup: env_setup
+.PHONY: env_prod_etup
 
 env_dev_setup:	## настроить переменные development окружения
 	@cp ../auth_api/.env.dev.example ../auth_api/.env
 env_dev_setup: env_setup
+.PHONY: env_dev_setup
 
 env_setup:
+	@echo "$(OS)"
 	@cp ../auth_db/.env.example 	../auth_db/.env
 	@cp ../.env.example ../.env
 
@@ -71,8 +78,7 @@ env_setup:
 		`id -u | xargs -I '{}' sed -i '' 's/HOST_UID=.*/HOST_UID={}/' ../.env`; \
 		`id -g | xargs -I '{}' sed -i '' 's/HOST_GID=.*/HOST_GID={}/' ../.env`; \
 	fi
-
-.PHONY: env_dev_setup
+.PHONY: env_setup
 
 docker/build:	## build the environment
 	$(DOCKER_COMPOSE) build

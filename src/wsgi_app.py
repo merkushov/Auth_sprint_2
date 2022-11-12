@@ -28,6 +28,6 @@ def after_request(response):
     jaeger_span.end()
     return response
 
-
+print(app.config)
 http_server = WSGIServer((app.config["WSGI_HOST"], app.config["WSGI_PORT"]), app)
 http_server.serve_forever()

@@ -11,6 +11,7 @@ class Config(object):
 
     APP_NAME = 'YP_Auth'
     BASE_DIR = Path(__file__).parent
+    FLASK_ENV = os.environ.get("FLASK_ENV")
     TESTING = False
     DEBUG = False
 
@@ -69,26 +70,31 @@ class Config(object):
 
 class ProductionConfig(Config):
     """Конфиг для продакшена."""
-    JAEGER_HOST = os.environ.get("JAEGER_HOST")
-    JAEGER_PORT = int(os.environ.get("JAEGER_PORT"))
-    JAEGER_UDP = int(os.environ.get("JAEGER_UDP"))
+    def __init__(self) -> None:
+        super().__init__()
+        self.JAEGER_HOST = os.environ.get("JAEGER_HOST")
+        self.JAEGER_PORT = int(os.environ.get("JAEGER_PORT"))
+        self.JAEGER_UDP = int(os.environ.get("JAEGER_UDP"))
 
-    WSGI_HOST = os.environ.get("WSGI_HOST")
-    WSGI_PORT = int(os.environ.get("WSGI_PORT"))
+        self.WSGI_HOST = os.environ.get("WSGI_HOST")
+        self.WSGI_PORT = int(os.environ.get("WSGI_PORT"))
 
 
 class TestingConfig(Config):
     """Конфиг для тестов."""
+    def __init__(self) -> None:
+        super().__init__()
+        self.TESTING = True
+        self.POSTGRES_DB = os.environ.get("POSTGRES_DB_TEST")
+        self.REDIS_DB = 1
 
-    TESTING = True
-    POSTGRES_DB = os.environ.get("POSTGRES_DB_TEST")
-    REDIS_DB = 1
 
 
 class DevelopmentConfig(Config):
     """Конфиг для девелопмент версии."""
-
-    DEBUG = True
+    def __init__(self) -> None:
+        super().__init__()
+        self.DEBUG = True
 
 
 environment = os.environ.get("FLASK_ENV")
