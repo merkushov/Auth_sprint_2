@@ -14,11 +14,48 @@ def init_routes(app: Flask):
 
 
 def setup_v1_routes(api_v1: Blueprint):
+
+    # Добавить OAuth эндпоинты в целевое АПИ
+    api_v1.add_url_rule(
+        "/login/yandex",
+        "yandex",
+        view_func=api_v1_c.get_yandex_oauth_controller().login,
+        methods=[
+            "GET",
+        ],
+    )
+    api_v1.add_url_rule(
+        "/login/yandex/authorize",
+        "yandex_authorize",
+        view_func=api_v1_c.get_yandex_oauth_controller().callback,
+        methods=[
+            "GET",
+        ],
+    )
+    api_v1.add_url_rule(
+        "/login/facebook",
+        "facebook",
+        view_func=api_v1_c.get_fb_oauth_controller().login,
+        methods=[
+            "GET",
+        ],
+    )
+    api_v1.add_url_rule(
+        "/login/facebook/authorize",
+        "facebook_authorize",
+        view_func=api_v1_c.get_fb_oauth_controller().callback,
+        methods=[
+            "GET",
+        ],
+    )
+
     api_v1.add_url_rule(
         "/ping",
         "ping",
         view_func=api_v1_c.get_health_check_controller().ping,
-        methods=["GET"],
+        methods=[
+            "GET"
+        ],
     )
 
     api_v1.add_url_rule(

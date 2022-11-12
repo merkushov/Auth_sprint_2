@@ -24,6 +24,14 @@ class AuthService:
         self.jwt_service = jwt_service
         self.black_list_storage = black_list_storage
 
+    def issue_tokens(self, user):
+        """Выдать пару токенов access и refresh токены после логина."""
+
+        token_pair = self.jwt_service.create_token_pair(user=user)
+        self.jwt_service.store_refresh_token(token_pair.refresh)
+
+        return token_pair
+
     def refresh_token(self, encoded_refresh_token: str) -> TokenPair:
         """Обновить пару токенов access и refresh токены по refresh токену.
 

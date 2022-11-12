@@ -3,6 +3,7 @@ from opentelemetry import trace
 from opentelemetry.instrumentation.flask import get_default_span_name
 
 from gevent.pywsgi import WSGIServer
+
 from app import create_app
 
 app = create_app()

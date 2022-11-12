@@ -67,6 +67,24 @@ class Config(object):
     RATE_LIMIT_THRESHOLD_ANNON_PER_MINUTE = 30
     RATE_LIMIT_THRESHOLD_REGISTERED_PER_MINUTE = 50
 
+    # OAuth 2.0 Google
+    OAUTH2_GOOGLE_CLIENT_ID = os.environ.get("OAUTH_GOOGLE_CLIENT_ID")
+    OAUTH2_GOOGLE_CLIENT_SECRET = os.environ.get("OAUTH_GOOGLE_CLIENT_SECRET")
+
+    # OAuth 2.0 Google
+    OAUTH2_YANDEX_CLIENT_ID = os.environ.get("OAUTH_YANDEX_CLIENT_ID")
+    OAUTH2_YANDEX_CLIENT_SECRET = os.environ.get("OAUTH_YANDEX_CLIENT_SECRET")
+
+    # OAuth
+    FACEBOOK_CLIENT_SECRET = os.environ.get('FB_CLIENT_SECRET')
+    FACEBOOK_CLIENT_ID = os.environ.get('FB_CLIENT_ID')
+    FACEBOOK_ACCESS_TOKEN_URL = os.environ.get('FB_ACCESS_TOKEN_URL')
+    FACEBOOK_ACCESS_TOKEN_PARAMS = os.environ.get('FB_ACCESS_TOKEN_PARAMS')
+    FACEBOOK_AUTHORIZE_URL = os.environ.get('FB_AUTHORIZE_URL')
+    FACEBOOK_AUTHORIZE_PARAMS = os.environ.get('FB_AUTHORIZE_PARAMS')
+    FACEBOOK_API_BASE_URL = os.environ.get('FB_API_BASE_URL')
+    FACEBOOK_CLIENT_KWARGS = {'scope': os.environ.get('FACEBOOK_CLIENT_KWARGS', 'openid login email')}
+
 
 class ProductionConfig(Config):
     """Конфиг для продакшена."""

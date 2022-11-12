@@ -1,6 +1,7 @@
 """Модели для SQLAlchemy."""
 
 import datetime
+import enum
 import uuid
 
 from sqlalchemy import DateTime
@@ -19,6 +20,32 @@ def generate_uuid():
     return uuid.uuid4()
 
 
+def create_partition_for_login_history(target, connection, **kwargs):
+    # предположим, что актуальными считаются записи за последнеи полгода
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS
+            auth.login_history_relevant
+        PARTITION OF auth.login_history
+        FOR VALUES FROM
+            (now() - interval '6 months')
+        TO
+            (now())
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS
+        auth.login_history_relevant
+        PARTITION OF auth.login_history
+        FOR VALUES FROM
+            (coalesce(min(created_at), now() - interval '6 months'))
+        TO
+            (now() - interval '6 months')
+        """
+    )
+
+
 class Base(db.Model):
     """Базовая модель."""
 
@@ -33,11 +60,16 @@ class LoginHistory(Base):
     """История входов пользователя."""
 
     __tablename__ = "login_history"
+    __table_args__ = {
+        **Base.__table_args__,
+        'postgresql_partition_by': 'RANGE (created_at)',
+        'listeners': [('after_create', create_partition_for_login_history)],
+    }
 
     id = db.Column(UUIDType(binary=False), primary_key=True, default=generate_uuid)
     user_id = db.Column(UUIDType(binary=False), index=True)
     info = db.Column(db.Text(), nullable=True)
-    created_at = db.Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = db.Column(DateTime, default=datetime.datetime.utcnow, primary_key=True)
 
 
 class RefreshJwt(Base):
@@ -47,7 +79,6 @@ class RefreshJwt(Base):
 
     id = db.Column(UUIDType(binary=False), primary_key=True, default=generate_uuid)
     user_id = db.Column(UUIDType(binary=False), index=True, primary_key=True)
-    # refresh_token = db.Column(db.Text(), unique=True)
     expire = db.Column(DateTime)
 
 
@@ -84,6 +115,22 @@ class User(Base):
     email = db.Column(db.Text(), index=True, unique=True)
     password_hash = db.Column(db.Text())
     roles = relationship("Role", secondary=user_role)
+    social_accounts = relationship('SocialAccount')
 
     def __repr__(self):
         return f"<User {self.username}>"
+
+
+class SocialAccount(Base):
+    """История входов через социальные сервисы."""
+    __tablename__ = 'social_account'
+    __table_args__ = (db.UniqueConstraint('social_id', 'social_name', name='social_pk'),)
+
+    id = db.Column(UUIDType(binary=False), primary_key=True, default=generate_uuid)
+
+    user_id = db.Column(UUIDType(binary=False), db.ForeignKey(User.id))
+    user = relationship("User")
+
+    social_id = db.Column(db.Text, nullable=False)
+    social_name = db.Column(db.Text, comment="Тип социального сервиса", nullable=False)
+

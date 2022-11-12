@@ -1,6 +1,7 @@
 from flask import Flask, Response, jsonify
 
 from api.routes import init_routes
+from auth import init_oauth
 from config import Config, app_config
 from db import init_db, init_migrate
 from exceptions import ApiException
@@ -27,8 +28,8 @@ def create_app(config_obj: Config = app_config):
     db = init_db(app)
     init_migrate(app, db)
 
+    init_oauth(app)
     init_routes(app)
-
     init_scripts(app)
 
     init_rate_limit(app, redis_client)

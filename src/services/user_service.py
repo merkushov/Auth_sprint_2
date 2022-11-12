@@ -21,10 +21,10 @@ class UserService:
         self.user_storage = user_storage
         self.role_storage = role_storage
 
-    def get_user(self, username: str) -> User:
+    def get_user(self, **user_kwargs) -> User:
         """Найти пользователя по имени."""
 
-        db_user = self.user_storage.get_user(username=username)
+        db_user = self.user_storage.get_user(**user_kwargs)
 
         user = User.from_orm(db_user)
 
@@ -125,3 +125,6 @@ class UserService:
         self.user_storage.delete_user_role(user=db_user, role=db_role)
 
         return None
+
+    def get_user_by_social_id(self, social_name, social_id):
+        return self.user_storage.get_user_by_social_id(social_name=social_name, social_id=social_id)
