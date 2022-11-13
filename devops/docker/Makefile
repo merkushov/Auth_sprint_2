@@ -17,6 +17,7 @@ DOCKER_COMPOSE_TEST=docker-compose -f docker-compose.test.yml --env-file ../.env
 DOCKER_AUTH_API=auth_api
 DOCKER_AUTH_DB=auth_db
 DOCKER_AUTH_REDIS=auth_redis
+DOCKER_AUTH_NGINX=auth_nginx
 
 DOCKER_AUTH_API_TEST=auth_test_api
 DOCKER_AUTH_DB_TEST=auth_test_db
@@ -25,7 +26,7 @@ DOCKER_AUTH_REDIS_TEST=auth_test_redis
 #[[ -z "${OS}" ]] && OS := (shell uname) || OS="${OS}"
 
 ifeq ($(OS),)
-OS := (shell uname)
+OS := $(shell uname)
 endif
 .DEFAULT_GOAL := help
 
@@ -139,6 +140,18 @@ db/psql:		## интерактивный терминал PostgreSQL
 db/waiting_for_readiness:
 	$(DOCKER_COMPOSE) exec $(DOCKER_AUTH_DB) bash -c 'until pg_isready 2>/dev/null; do sleep 1 ; done; echo "Database ready."'
 .PHONY: db/waiting_for_readiness
+
+#
+# Nginx
+#
+
+nginx/bash:		## доступ в контейнер с Nginx
+	$(DOCKER_COMPOSE) exec $(DOCKER_AUTH_NGINX) bash
+.PHONY: nginx/bash
+
+nginx/log:		## посмотреть логи контейнера Nginx
+	$(DOCKER_COMPOSE) logs --follow $(DOCKER_AUTH_NGINX)
+.PHONY: nginx/log
 
 #
 # Redis

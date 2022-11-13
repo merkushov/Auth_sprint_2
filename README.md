@@ -15,23 +15,28 @@ make test/run_integration
 make help
 ```
 
-# Проектная работа 7 спринта
+## Ручное тестирование интеграции AsyncAPI и AuthAPI
 
-Упростите регистрацию и аутентификацию пользователей в Auth-сервисе, добавив вход через социальные сервисы. Список сервисов выбирайте исходя из целевой аудитории онлайн-кинотеатра — подумайте, какими социальными сервисами они пользуются. Например, использовать [OAuth от Github](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps){target="_blank"} — не самая удачная идея. Ваши пользователи не разработчики и вряд ли имеют аккаунт на Github. А вот добавить Twitter, Facebook, VK, Google, Yandex или Mail будет хорошей идеей.
+Два сервиса подняты в докер-контейнерах. Общаемся с ними через сервис Nginx
 
-Вам не нужно делать фронтенд в этой задаче и реализовывать собственный сервер OAuth. Нужно реализовать протокол со стороны потребителя.
+```shell
+# создать нового пользователя и залогиниться
+curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/user -d '{"username": "test_user","email": "test@gmail.com","password": "12345"}'
+curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/login -d '{"username": "test_user", "password": "12345"}'
 
-Информация по OAuth у разных поставщиков данных: 
+export AUTH_API_ACCESS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3YTZlMmExYy1kNDA0LTQ4ZTAtYjk1Yi0xMzBhNzc4ZmFhYTkiLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjA5ODZlNDc2LTYwYzQtNGQzOS1iNTllLTQ5MjdkZDVmMThjMSIsInVzZXJfcm9sZXMiOltdLCJleHBpcmVkIjoiMjAyMi0xMS0xM1QxNTo1OTo1NCJ9.rN9mLZK_bG-zWic6WX-OKTaHh0c5qUXIAPTu64xmzx8
 
-- [Twitter](https://developer.twitter.com/en/docs/authentication/overview){target="_blank"},
-- [Facebook](https://developers.facebook.com/docs/facebook-login/){target="_blank"},
-- [VK](https://vk.com/dev/access_token){target="_blank"},
-- [Google](https://developers.google.com/identity/protocols/oauth2){target="_blank"},
-- [Yandex](https://yandex.ru/dev/oauth/?turbo=true){target="_blank"},
-- [Mail](https://api.mail.ru/docs/guides/oauth/){target="_blank"}.
+# создать роли и привязать роль subscriber к пользователю
+curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/role -d '{"name": "user"}'
+curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/role -d '{"name": "subscriber"}'
+curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/user/0986e476-60c4-4d39-b59e-4927dd5f18c1/role/d71820c9-a053-4e1b-ad33-4b69c3f9d32e
 
-## Дополнительное задание
+# убедиться, что роль пользователю выдана
+curl -XGET -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/me/roles
 
-Реализуйте возможность открепить аккаунт в соцсети от личного кабинета. 
-
-Решение залейте в репозиторий текущего спринта и отправьте на ревью.
+# запросить список фильмов
+#   Ограничения: 
+#    - неавторизованному пользователю будет доступны только первые 10 фильмов из списка
+#    - авторизованный пользователь с ролью subscriber будет иметь доступ к полному списку
+curl -XGET -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/async_api/v1/film/
+```

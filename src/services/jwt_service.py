@@ -29,7 +29,7 @@ class JWTService:
         access_token = AccessToken(
             jti=str(jti),
             user_id=str(user.id),
-            user_roles=user.roles,
+            user_roles=[role.name for role in user.roles],
             expired=self._get_token_expiration_time(app_config.ACCESS_TOKEN_LIFETIME),
         )
         access_token._encoded_token = self.encode(access_token)
