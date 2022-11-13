@@ -2,6 +2,8 @@ version: "3.9"
 
 networks:
   yp_network:
+    name: yp_network
+    external: true
 
 volumes:
   yp_auth_db_data:
@@ -43,11 +45,24 @@ services:
     user: "authapi"
     restart: always
     ports:
-      - "5005:5000"
+      - "8003:8000"
     env_file:
       - ../../devops/auth_api/.env
     depends_on:
       - auth_db
       - auth_redis
+    networks:
+      - yp_network
+
+  auth_nginx:
+    image: nginx:1.19.2
+    container_name: yp_auth_nginx
+    volumes:
+      - ../auth_nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../auth_nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - auth_api
+    ports:
+      - "80:80"
     networks:
       - yp_network
