@@ -9,7 +9,8 @@ from pydantic import EmailStr, Field, constr, root_validator
 import exceptions as exc
 from models.api.base import BaseServiceModel
 from models.api.role import Role
-from models.db.auth_model import User, db
+from models.db.auth_model import User as ModelUser
+from models.db.auth_model import db
 from utils.password import random_password
 
 
@@ -37,12 +38,11 @@ class InputCreateProviderUser(InputCreateUser):
 
         if not values.get("username"):
             email = values.get("email")
-            username = email[0 : email.index("@")]
+            name = email[0 : email.index("@")]
             # чтобы не пересекались username
-            while db.session.query(User).where(User.username == username).one_or_none():
-                username += '1'
-
-            values['username'] = username
+            while db.session.query(ModelUser).filter(ModelUser.username==name).one_or_none():
+                name += '1'
+            values['username'] = name
 
         elif not values.get("email"):
             values["email"] = values.get("username") + "@localhost"
