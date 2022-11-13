@@ -43,6 +43,15 @@ class UserController:
         return jsonify(response_data), status.OK
 
     @auth_required
+    def get_my_roles(self, access_token: AccessToken):
+        """Возвращает все роли текущего пользователя"""
+
+        user = self.user_service.get_user(id=access_token.user_id)
+        output_roles = [role.dict() for role in user.roles]
+
+        return jsonify(output_roles), status.OK
+
+    @auth_required
     def delete_user_role(self, access_token: AccessToken, user_id: UUID, role_id: UUID):
         """Удалить Роль у Пользователя."""
 
