@@ -30,13 +30,13 @@ def create_partition_for_login_history(target, connection, **kwargs):
         FOR VALUES FROM
             (now() - interval '6 months')
         TO
-            (now())
+            (now() + interval '6 months')
         """
     )
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS
-        auth.login_history_relevant
+            auth.login_history_relevant
         PARTITION OF auth.login_history
         FOR VALUES FROM
             (coalesce(min(created_at), now() - interval '6 months'))
