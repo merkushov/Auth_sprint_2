@@ -30,7 +30,7 @@ def create_partition_for_login_history(target, connection, **kwargs):
         FOR VALUES FROM
             (now() - interval '6 months')
         TO
-            (now())
+            (now() + interval '6 months')
         """
     )
     connection.execute(
