@@ -19,7 +19,7 @@ class AccessToken(BaseServiceModel):
     _encoded_token: Optional[str] = None
 
     jti: str
-    type: str = Field(app_config.ACCESS_TOKEN_TYPE, const=True)
+    type: str = Field(app_config.access_token_type, const=True)
     user_id: str
     user_roles: Optional[List[str]]
     expired: datetime.datetime
@@ -36,7 +36,7 @@ class RefreshToken(BaseServiceModel):
     _encoded_token: Optional[str] = None
 
     jti: str
-    type: str = Field(app_config.REFRESH_TOKEN_TYPE, const=True)
+    type: str = Field(app_config.refresh_token_type, const=True)
     user_id: str
     expired: datetime.datetime
 

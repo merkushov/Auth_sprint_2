@@ -1,6 +1,7 @@
 from flask import request
 from opentelemetry import trace
 from opentelemetry.instrumentation.flask import get_default_span_name
+from config import app_config
 
 from gevent.pywsgi import WSGIServer
 
@@ -8,6 +9,7 @@ from app import create_app
 
 app = create_app()
 jaeger_span = None
+
 
 @app.before_request
 def before_request():
@@ -29,6 +31,6 @@ def after_request(response):
     jaeger_span.end()
     return response
 
-print(app.config)
-http_server = WSGIServer((app.config["WSGI_HOST"], app.config["WSGI_PORT"]), app)
+
+http_server = WSGIServer((app_config.wsgi_host, app_config.wsgi_port), app)
 http_server.serve_forever()
