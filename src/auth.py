@@ -1,4 +1,5 @@
 from authlib.integrations.flask_client import OAuth
+from config import app_config
 
 oauth = OAuth()
 
@@ -15,8 +16,8 @@ def init_oauth(app):
         authorize_url='https://oauth.yandex.ru/authorize',
         authorize_params=None,
         client_kwargs={'scope': 'login:email login:info'},
-        client_id=app.config.get("OAUTH2_YANDEX_CLIENT_ID"),
-        client_secret=app.config.get("OAUTH2_YANDEX_CLIENT_SECRET"),
+        client_id=app_config.oauth2.yandex_client_id,
+        client_secret=app_config.oauth2.yandex_client_secret,
     )
 
     oauth.register(
@@ -25,14 +26,14 @@ def init_oauth(app):
         client_kwargs={
             'scope': 'openid email profile'
         },
-        client_id=app.config.get("OAUTH2_GOOGLE_CLIENT_ID"),
-        client_secret=app.config.get("OAUTH2_GOOGLE_CLIENT_SECRET"),
+        client_id=app_config.oauth2.google_client_id,
+        client_secret=app_config.oauth2.google_client_secret,
     )
 
     oauth.register(
         name='facebook',
-        client_id=app.config.get('FACEBOOK_CLIENT_ID'),
-        client_secret=app.config.get('FACEBOOK_CLIENT_SECRET'),
+        client_id=app_config.oauth2.facebook_client_id,
+        client_secret=app_config.oauth2.facebook_client_secret,
         access_token_url='https://graph.facebook.com/oauth/access_token',
         authorize_url='https://www.facebook.com/dialog/oauth',
         api_base_url='https://graph.facebook.com/',

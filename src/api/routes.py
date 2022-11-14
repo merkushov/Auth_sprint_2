@@ -26,7 +26,7 @@ def setup_v1_routes(api_v1: Blueprint):
     )
     api_v1.add_url_rule(
         f"/login/{OAuthProvider.yandex.name}/authorize",
-        "{OAuthProvider.yandex.name}_authorize",
+        f"{OAuthProvider.yandex.name}_authorize",
         view_func=api_v1_c.get_yandex_oauth_controller().callback,
         methods=[
             "GET",

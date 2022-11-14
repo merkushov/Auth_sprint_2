@@ -1,9 +1,10 @@
 import flask
 from functools import wraps
+from config import app_config
 
 
 def init_tracer(app):
-    if app.config["FLASK_ENV"] == "production":
+    if app_config.flask_env == "production":
         # Configure tracer for production - requires opentelemetry
 
         from opentelemetry import trace
@@ -13,12 +14,12 @@ def init_tracer(app):
         from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
         from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
-        trace.set_tracer_provider(TracerProvider(resource=Resource.create({"service.name": app.config["APP_NAME"]})))
+        trace.set_tracer_provider(TracerProvider(resource=Resource.create({"service.name": app_config.app_name})))
         trace.get_tracer_provider().add_span_processor(
             BatchSpanProcessor(
                 JaegerExporter(
-                    agent_host_name=app.config["JAEGER_HOST"],
-                    agent_port=int(app.config["JAEGER_UDP"]),
+                    agent_host_name=app_config.jaeger_host,
+                    agent_port=int(app_config.jaeger_udp),
                 )
             )
         )
@@ -37,7 +38,7 @@ def trace_export(span_name='span'):
         @wraps(func)
         def wrapper(*args, **kwargs):
             
-            if flask.current_app.config["FLASK_ENV"] == 'production':
+            if app_config.flask_env == 'production':
                 from opentelemetry import trace
                 tracer = trace.get_tracer(__name__)
                 with tracer.start_as_current_span(span_name):

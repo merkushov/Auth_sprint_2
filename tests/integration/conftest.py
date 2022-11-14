@@ -14,6 +14,7 @@ import sqlalchemy as sa
 from alembic.config import Config as AlembicConfig
 from flask import Response
 from flask_redis import FlaskRedis
+from config import app_config
 
 from app import create_app
 from config import TestingConfig
@@ -47,14 +48,14 @@ def app():
 def db(app):
     db = init_db(app)
 
-    alembic_location = os.path.join(app.config["BASE_DIR"], "migrations")
+    alembic_location = os.path.join(app_config.base_dir, "migrations")
 
     cwd = os.getcwd()
     os.chdir(alembic_location)
 
     alembic_cfg = AlembicConfig("alembic.ini")
     alembic_cfg.set_main_option("script_location", alembic_location)
-    alembic_cfg.set_main_option("sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"])
+    alembic_cfg.set_main_option("sqlalchemy.url", app_config.postgres.uri())
 
     alembic_command.upgrade(alembic_cfg, "head")
 
