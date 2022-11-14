@@ -1,7 +1,7 @@
 from flask import Blueprint, Flask
 
 import api.v1.controllers as api_v1_c
-
+from models.api.social_account import OAuthProvider
 
 def init_routes(app: Flask):
     api = Blueprint("api", __name__, url_prefix="/api")
@@ -17,32 +17,32 @@ def setup_v1_routes(api_v1: Blueprint):
 
     # Добавить OAuth эндпоинты в целевое АПИ
     api_v1.add_url_rule(
-        "/login/yandex",
-        "yandex",
+        f"/login/{OAuthProvider.yandex.name}",
+        f"{OAuthProvider.yandex.name}",
         view_func=api_v1_c.get_yandex_oauth_controller().login,
         methods=[
             "GET",
         ],
     )
     api_v1.add_url_rule(
-        "/login/yandex/authorize",
-        "yandex_authorize",
+        f"/login/{OAuthProvider.yandex.name}/authorize",
+        "{OAuthProvider.yandex.name}_authorize",
         view_func=api_v1_c.get_yandex_oauth_controller().callback,
         methods=[
             "GET",
         ],
     )
     api_v1.add_url_rule(
-        "/login/facebook",
-        "facebook",
+        f"/login/{OAuthProvider.facebook.name}",
+        f"{OAuthProvider.facebook.name}",
         view_func=api_v1_c.get_fb_oauth_controller().login,
         methods=[
             "GET",
         ],
     )
     api_v1.add_url_rule(
-        "/login/facebook/authorize",
-        "facebook_authorize",
+        f"/login/{OAuthProvider.facebook.name}/authorize",
+        f"{OAuthProvider.facebook.name}_authorize",
         view_func=api_v1_c.get_fb_oauth_controller().callback,
         methods=[
             "GET",
