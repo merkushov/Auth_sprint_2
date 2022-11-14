@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from http import HTTPStatus
 from logging import getLogger
 
-from flask import Response, request
+from flask import request
 
 from exceptions import ApiUserNotFoundException
 from models.api.social_account import (
@@ -72,10 +72,7 @@ class OAuthController(ABC):
 
         response, status_code = self.insert(new_provider_user=new_provider_user, parsed_token=parsed_token)
 
-        return Response(
-            response=response,
-            status=status_code
-        )
+        return response, status_code
 
     def authorize(self, user: User):
         """Авторизация и выдача токенов доступа после универсального логина."""
@@ -84,7 +81,13 @@ class OAuthController(ABC):
         self.user_service.create_access_history(user,
                                                 request.headers["User-Agent"] + auth_method_stamp
                                                 )
-        return self.auth_service.issue_tokens(user).json()
+        token_pair = self.auth_service.issue_tokens(user)
+        logger.info("OAuth issued tokens: " + repr(token_pair))
+
+        return {
+            "access": token_pair.access.encoded_token,
+            "refresh": token_pair.refresh.encoded_token
+        }
 
     def insert(self, parsed_token: ParsedToken, new_provider_user: InputCreateProviderUser):
         try:
