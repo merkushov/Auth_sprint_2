@@ -9,7 +9,6 @@ def init_tracer(app):
         from opentelemetry import trace
         from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace import Span
         from opentelemetry.instrumentation.flask import FlaskInstrumentor
         from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
         from opentelemetry.exporter.jaeger.thrift import JaegerExporter

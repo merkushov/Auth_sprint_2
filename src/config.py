@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class Config(object):
+class Config():
     """Настройки приложения."""
 
     APP_NAME = 'YP_Auth'

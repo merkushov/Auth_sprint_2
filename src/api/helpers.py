@@ -8,7 +8,7 @@ from models.api.tokens import AccessToken
 from services import JWTService, get_jwt_service
 
 
-def get_access_token(request: Request) -> None:
+def get_access_token(request: Request) -> str:
     access_token_str = None
 
     if "Authorization" in request.headers:
