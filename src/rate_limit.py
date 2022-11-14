@@ -18,22 +18,18 @@ def check_limit(redis_client: FlaskRedis, jwt_service: JWTService) -> None:
     #       два раза проверять access_token
     access_token_str = get_access_token(request)
     if access_token_str:
-        logging.info("=== got token === ")
-        try:
-            access_token = decode_access_token(
-                service=jwt_service, encoded_token=access_token_str
-            )
+        access_token = decode_access_token(
+            service=jwt_service, encoded_token=access_token_str
+        )
 
-            validate_access_token(
-                service=jwt_service,
-                access_token=access_token,
-            )
+        validate_access_token(
+            service=jwt_service,
+            access_token=access_token,
+        )
 
-            key_id = f"user_id:{access_token.user_id}"
+        key_id = f"user_id:{access_token.user_id}"
 
-            annon = False
-        except Exception:
-            pass
+        annon = False
 
     if not key_id:
         key_id = hashlib.md5(
