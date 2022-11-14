@@ -2,8 +2,9 @@ version: "3.9"
 
 networks:
   yp_network:
-    name: yp_network
-    external: true
+    # enable this only when full external docker async_api available
+    # name: yp_network
+    # external: true
 
 volumes:
   yp_auth_db_data:
