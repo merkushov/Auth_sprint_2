@@ -24,7 +24,7 @@ def init_tracer(app):
         )
 
         # Чтобы видеть трейсы в консоли
-        trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+        # trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
         tracer = FlaskInstrumentor().instrument_app(app) 
 
