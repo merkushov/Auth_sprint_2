@@ -15,6 +15,7 @@ class DBSettings(BaseSettings):
 
     class Config:
         env_prefix = 'postgres_'
+        env_nested_delimiter = '_'
 
     def uri(self):
         return f"postgresql://{self.user}:{self.password}@{self.host}/{self.db}"
@@ -27,13 +28,14 @@ class DBSettingsTest(DBSettings):
 class RedisSettings(BaseSettings):
     host: str = Field(default='localhost')
     port: int = Field(default=6379)
-    db: str = Field(default='0')
+    db: int = Field(default=0)
 
     class Config:
         env_prefix = 'redis_'
+        env_nested_delimiter = '_'
 
     def url(self):
-        return f"redis://{self.host}:{self.port}"
+        return f"redis://{self.host}:{self.port}/{self.db}"
 
 
 class OAuthCredentials(BaseSettings):
@@ -51,6 +53,7 @@ class OAuthCredentials(BaseSettings):
 
     class Config:
         env_prefix = 'oauth2_'
+        env_nested_delimiter = '_'
 
 
 class Config(BaseSettings):

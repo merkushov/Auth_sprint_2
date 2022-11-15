@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Request, request
 
 import exceptions as exc
-from config import Config
+from config import app_config
 from models.api.tokens import AccessToken
 from services import JWTService, get_jwt_service
 
@@ -23,7 +23,7 @@ def decode_access_token(service: JWTService, encoded_token: str) -> AccessToken:
 
 
 def validate_access_token(service: JWTService, access_token: AccessToken) -> None:
-    if access_token.type != Config.ACCESS_TOKEN_TYPE:
+    if access_token.type != app_config.access_token_type:
         raise exc.ApiTokenWrongTypeException
 
     service.is_expired(token=access_token)

@@ -30,14 +30,14 @@ class JWTService:
             jti=str(jti),
             user_id=str(user.id),
             user_roles=[role.name for role in user.roles],
-            expired=self._get_token_expiration_time(app_config.ACCESS_TOKEN_LIFETIME),
+            expired=self._get_token_expiration_time(app_config.access_token_lifetime),
         )
         access_token._encoded_token = self.encode(access_token)
 
         refresh_token = RefreshToken(
             jti=str(jti),
             user_id=str(user.id),
-            expired=self._get_token_expiration_time(app_config.REFRESH_TOKEN_LIFETIME),
+            expired=self._get_token_expiration_time(app_config.refresh_token_lifetime),
         )
         refresh_token._encoded_token = self.encode(refresh_token)
 
@@ -50,14 +50,14 @@ class JWTService:
         """Закодировать объект Токен в строку JWT формата."""
         return jwt.encode(
             orjson.loads(token.json()),
-            app_config.JWT_SECRET_KEY,
-            algorithm=app_config.JWT_ALGORITHM,
+            app_config.jwt_secret_key,
+            algorithm=app_config.jwt_algorithm,
         )
 
     def _get_token_expiration_time(self, token_lifetime: int) -> str:
         result = (
             datetime.datetime.now() + datetime.timedelta(minutes=token_lifetime)
-        ).strftime(app_config.JWT_DATETIME_PATTERN)
+        ).strftime(app_config.jwt_datetime_pattern)
         return result
 
     def store_refresh_token(self, token: RefreshToken) -> None:
@@ -78,7 +78,7 @@ class JWTService:
 
     def is_refresh_token(self, decoded_token: Union[RefreshToken, AccessToken]):
         """Проверка является ли токен refresh-токеном."""
-        if decoded_token.type != app_config.REFRESH_TOKEN_TYPE:
+        if decoded_token.type != app_config.refresh_token_type:
             raise exc.ApiTokenWrongTypeException
 
     def decode(self, encoded_token: str) -> Union[RefreshToken, AccessToken]:
@@ -86,9 +86,9 @@ class JWTService:
         try:
             token_data = jwt.decode(
                 encoded_token,
-                app_config.JWT_SECRET_KEY,
+                app_config.jwt_secret_key,
                 algorithms=[
-                    app_config.JWT_ALGORITHM,
+                    app_config.jwt_algorithm,
                 ],
             )
         except jwt.ExpiredSignatureError:
@@ -103,9 +103,9 @@ class JWTService:
                 detail="Отсутствует обязательное поле 'type'"
             )
 
-        if token_data["type"] == app_config.REFRESH_TOKEN_TYPE:
+        if token_data["type"] == app_config.refresh_token_type:
             token = RefreshToken.parse_obj(token_data)
-        elif token_data["type"] == app_config.ACCESS_TOKEN_TYPE:
+        elif token_data["type"] == app_config.access_token_type:
             token = AccessToken.parse_obj(token_data)
         else:
             raise exc.ApiTokenValidationException(detail="Тип токена не валиден")

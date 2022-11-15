@@ -28,7 +28,8 @@ def before_request():
 def after_request(response):
     global jaeger_span
 
-    jaeger_span.end()
+    if jaeger_span:
+        jaeger_span.end()
     return response
 
 

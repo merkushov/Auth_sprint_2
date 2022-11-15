@@ -10,17 +10,17 @@ def init_scripts(app: Flask):
     @app.cli.command("createuser")
     def create_user_command():
         """Создать простого пользователя."""
-        create_user(app_config.USER_ROLE_NAME)
+        create_user(app_config.user_role_name)
 
     @app.cli.command("createsuperuser")
     def create_admin_command():
         """Создать суперпользователя."""
-        create_user(app_config.ADMIN_ROLE_NAME)
+        create_user(app_config.admin_role_name)
 
     @app.cli.command("createsubscriber")
     def create_subscriber_command():
         """Создать пользователя-подписчика."""
-        create_user(app_config.SUBSCRIBER_ROLE_NAME)
+        create_user(app_config.subscriber_role_name)
 
     @app.cli.command("createrole")
     @click.argument("name")
