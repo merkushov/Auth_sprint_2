@@ -59,9 +59,9 @@ cd ..
 
 # создать нового пользователя и залогиниться
 curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/user -d '{"username": "test_user","email": "test@gmail.com","password": "12345"}'
-curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/login -d '{"username": "test_user", "password": "12345"}'
 
-export AUTH_API_ACCESS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3YTZlMmExYy1kNDA0LTQ4ZTAtYjk1Yi0xMzBhNzc4ZmFhYTkiLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9pZCI6IjA5ODZlNDc2LTYwYzQtNGQzOS1iNTllLTQ5MjdkZDVmMThjMSIsInVzZXJfcm9sZXMiOltdLCJleHBpcmVkIjoiMjAyMi0xMS0xM1QxNTo1OTo1NCJ9.rN9mLZK_bG-zWic6WX-OKTaHh0c5qUXIAPTu64xmzx8
+export AUTH_API_ACCESS_TOKEN=$(curl -s -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/login -d '{"username": "test_user", "password": "12345"}' | jq '.access' | xargs -L 1)
+
 
 # создать роли и привязать роль subscriber к пользователю
 curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/role -d '{"name": "user"}'
@@ -76,4 +76,7 @@ curl -XGET -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_A
 #    - неавторизованному пользователю будет доступны только первые 10 фильмов из списка
 #    - авторизованный пользователь с ролью subscriber будет иметь доступ к полному списку
 curl -XGET -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/async_api/v1/film/
+
+# запрос с пэйджингом, доступным только авторизованному пользователю
+curl -s -XGET  -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" "http://localhost/async_api/v1/film/?page\[size\]=30&page\[number\]=2" | jq -r '.[].title'
 ```
