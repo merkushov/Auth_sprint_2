@@ -4,8 +4,11 @@ from config import app_config
 
 redis_client = FlaskRedis()
 
-
 def init_redis(app: Flask) -> FlaskRedis:
+
+    # FlaskRedis requires this to be set
+    app.config['REDIS_URL'] = app_config.redis.url()
+
     redis_client.init_app(
         app=app,
         host=app_config.redis.host,

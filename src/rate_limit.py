@@ -50,15 +50,15 @@ def check_limit(redis_client: FlaskRedis, jwt_service: JWTService) -> None:
 
     if (
         annon is True
-        and counter > app_config.RATE_LIMIT_THRESHOLD_ANNON_PER_MINUTE
+        and counter > app_config.rate_limit_threshold_annon_per_minute
         or annon is False
-        and counter > app_config.RATE_LIMIT_THRESHOLD_REGISTERED_PER_MINUTE
+        and counter > app_config.rate_limit_threshold_registered_per_minute
     ):
         if annon is True:
-            excess_amount = counter - app_config.RATE_LIMIT_THRESHOLD_ANNON_PER_MINUTE
+            excess_amount = counter - app_config.rate_limit_threshold_annon_per_minute
         else:
             excess_amount = (
-                counter - app_config.RATE_LIMIT_THRESHOLD_REGISTERED_PER_MINUTE
+                counter - app_config.rate_limit_threshold_registered_per_minute
             )
 
         logging.warning("Request limit exceeded by %s. Key: %s", excess_amount, key)

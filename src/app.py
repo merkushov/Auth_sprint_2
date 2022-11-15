@@ -22,6 +22,7 @@ def create_app(config_obj: Config = app_config):
     app = Flask(__name__)
 
     app.config.from_object(config_obj)
+    app.config['SECRET_KEY'] = app_config.secret_key
 
     redis_client = init_redis(app)
 
