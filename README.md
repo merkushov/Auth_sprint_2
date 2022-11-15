@@ -20,6 +20,43 @@ make help
 Два сервиса подняты в докер-контейнерах. Общаемся с ними через сервис Nginx
 
 ```shell
+export ENV=dev
+
+ # скачать и развернуть 4 репозитория микросервисов
+ 
+# Админка
+git clone git@github.com:merkushov/Admin_panel_sprint_2.git
+cd Admin_panel_sprint_2
+make dev/setup
+make app/fake_data
+
+cd ..
+
+# ETL
+git clone git@github.com:merkushov/ETL.git
+cd ETL
+make dev_setup
+
+cd ..
+
+# АПИ фильмов
+git clone git@github.com:merkushov/Async_API_sprint_2.git
+cd Async_API_sprint_2
+make dev/setup
+
+cd ..
+
+# АПИ Авторизации
+git clone git@github.com:merkushov/Auth_sprint_2.git
+cd Auth_sprint_2
+make dev/setup
+
+cd ..
+
+# после этого будет доступна единая точка входа к 3м интерфейсам 
+# (Админка, АПИ фильмов, АПИ авторизации) на хостовой системе
+#   localhost:80
+
 # создать нового пользователя и залогиниться
 curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/user -d '{"username": "test_user","email": "test@gmail.com","password": "12345"}'
 curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/login -d '{"username": "test_user", "password": "12345"}'
