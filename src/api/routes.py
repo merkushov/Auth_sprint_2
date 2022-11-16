@@ -4,7 +4,7 @@ import api.v1.controllers as api_v1_c
 from models.api.social_account import OAuthProvider
 
 def init_routes(app: Flask):
-    api = Blueprint("api", __name__, url_prefix="/auth_api")
+    api = Blueprint("api", __name__, url_prefix="/api")
     api_v1 = Blueprint("v1", __name__, url_prefix="/v1")
 
     setup_v1_routes(api_v1)
@@ -44,6 +44,22 @@ def setup_v1_routes(api_v1: Blueprint):
         f"/login/{OAuthProvider.facebook.name}/authorize",
         f"{OAuthProvider.facebook.name}_authorize",
         view_func=api_v1_c.get_fb_oauth_controller().callback,
+        methods=[
+            "GET",
+        ],
+    )
+    api_v1.add_url_rule(
+        f"/login/{OAuthProvider.google.name}",
+        f"{OAuthProvider.google.name}",
+        view_func=api_v1_c.get_google_oauth_controller().login,
+        methods=[
+            "GET",
+        ],
+    )
+    api_v1.add_url_rule(
+        f"/login/{OAuthProvider.google.name}/authorize",
+        f"{OAuthProvider.google.name}_authorize",
+        view_func=api_v1_c.get_google_oauth_controller().callback,
         methods=[
             "GET",
         ],

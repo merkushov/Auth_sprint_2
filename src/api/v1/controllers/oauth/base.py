@@ -61,11 +61,11 @@ class OAuthController(ABC):
         """Получение подтверждения от провайдера и выдача токенов."""
 
         token = self.oauth_provider.authorize_access_token()
-        logger.error(token)
+        logger.debug(token)
 
         parsed_token = self._get_social_data(token)
 
-        logger.error(parsed_token)
+        logger.debug(parsed_token)
         new_provider_user = InputCreateProviderUser(
             email=parsed_token.user_info.email,
         )
@@ -82,7 +82,7 @@ class OAuthController(ABC):
                                                 request.headers["User-Agent"] + auth_method_stamp
                                                 )
         token_pair = self.auth_service.issue_tokens(user)
-        logger.info("OAuth issued tokens: " + repr(token_pair))
+        logger.debug("OAuth issued tokens: " + repr(token_pair))
 
         return {
             "access": token_pair.access.encoded_token,
