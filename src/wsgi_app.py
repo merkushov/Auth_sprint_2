@@ -16,11 +16,11 @@ def before_request():
     global jaeger_span
 
     request_id = request.headers.get('X-Request-Id')
-    if not request_id:
+    if app_config.telemetry_enabled and not request_id:
         raise RuntimeError('X-Request-Id is required for client identification')
 
     tracer = trace.get_tracer(__name__)
-    jaeger_span = tracer.start_span(name='flask_auth')
+    jaeger_span = tracer.start_span(name='movie_catalog')
     jaeger_span.set_attribute('http.request_id', request_id)
 
 
