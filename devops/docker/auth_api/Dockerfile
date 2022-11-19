@@ -40,11 +40,15 @@ RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/base.txt"
 
 FROM base AS production
 
-USER ${USER}
+USER root
 
 COPY --chown=${USER}:${GROUP} src ${APP_HOME}
 
+USER ${USER}
+
 RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/prod.txt"
+
+WORKDIR ${APP_HOME}
 
 # -----------------------------------------------------------------------------
 # functional tests environment

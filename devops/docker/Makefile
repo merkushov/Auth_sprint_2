@@ -10,8 +10,8 @@ else
 DOCKER_COMPOSE_FILE=-f docker-compose.dev.yml
 endif
 
-DOCKER_COMPOSE=docker-compose -f docker-compose.yml $(DOCKER_COMPOSE_FILE) --env-file ../.env
-DOCKER_COMPOSE_TEST=docker-compose -f docker-compose.test.yml --env-file ../.env
+DOCKER_COMPOSE=docker-compose -p "auth_api" -f docker-compose.yml $(DOCKER_COMPOSE_FILE) --env-file ../.env
+DOCKER_COMPOSE_TEST=docker-compose -p "auth_api_test" -f docker-compose.test.yml --env-file ../.env
 
 # имя контейнеров в docker-compose
 DOCKER_AUTH_API=auth_api
@@ -38,7 +38,7 @@ help:	## список доступных команд
 env_prod_setup:	## настроить переменные production окружения
 	@cp ../auth_api/.env.prod.example ../auth_api/.env
 	@make env_setup
-.PHONY: env_prod_etup
+.PHONY: env_prod_setup
 
 env_dev_setup:	## настроить переменные development окружения
 	@cp ../auth_api/.env.dev.example ../auth_api/.env
