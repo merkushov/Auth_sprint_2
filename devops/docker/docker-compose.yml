@@ -2,7 +2,6 @@ version: "3.9"
 
 networks:
   yp_network:
-    # enable this only when full external docker async_api available
     name: yp_network
     external: true
 

@@ -106,6 +106,12 @@ class Config(BaseSettings):
 
     oauth2: OAuthCredentials = OAuthCredentials()
 
+    jaeger_host: str = Field(default="auth_jaeger")
+    jaeger_port: int = Field(default=9411)
+    jaeger_udp: int = Field(default=6831)
+
+    telemetry_enabled: bool = Field(default=True)
+
     class Config:
         env_nested_delimiter = '_'
 
@@ -121,12 +127,8 @@ class Config(BaseSettings):
 class ProductionConfig(Config):
     """Конфиг для продакшена."""
 
-    jaeger_host: str = Field(default="localhost")
-    jaeger_port: int = Field(default=9411)
-    jaeger_udp: int = Field(default=6831)
-
-    wsgi_host: str = Field(default="localhost")
-    wsgi_port: int = Field(default=5005)
+    wsgi_host: str = Field(default="0.0.0.0")
+    wsgi_port: int = Field(default=8000)
 
 
 class TestingConfig(Config):
