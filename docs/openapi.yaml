@@ -101,6 +101,24 @@ paths:
           $ref: '#/components/responses/422_UnprocessableEntity'
       security:
       - bearerAuth: []
+    get:
+      tags:
+        - me
+      summary: Получить инфу по авторизованному пользователю
+      description: Возвращает данные уже авторизованного Пользователя
+      responses:
+        200:
+          description: Запрос выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          $ref: '#/components/responses/404_NotFound'
+        422:
+          $ref: '#/components/responses/422_UnprocessableEntity'
+      security:
+        - bearerAuth: [ ]
   /me/logout:
     get:
       tags:

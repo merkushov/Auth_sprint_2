@@ -62,6 +62,8 @@ curl -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/use
 
 export AUTH_API_ACCESS_TOKEN=$(curl -s -XPOST -H "Content-Type: application/json" http://localhost/auth_api/v1/login -d '{"username": "test_user", "password": "12345"}' | jq '.access' | xargs -L 1)
 
+# получить информацию по авторизованному пользователю, т.е. собственные данные
+curl -XGET -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/me
 
 # создать роли и привязать роль subscriber к пользователю
 curl -XPOST -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_API_ACCESS_TOKEN" http://localhost/auth_api/v1/role -d '{"name": "user"}'

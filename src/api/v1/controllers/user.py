@@ -80,3 +80,13 @@ class UserController:
         output_user = OutputUser(**updated_user.dict())
 
         return jsonify(output_user.dict()), status.OK
+
+    @auth_required
+    def get_current_user_info(self, access_token: AccessToken):
+        """Возвращает информацию по авторизованному пользователю"""
+
+        user = self.user_service.get_user(id=access_token.user_id)
+
+        output_user = OutputUser(**user.dict())
+
+        return jsonify(output_user.dict()), status.OK

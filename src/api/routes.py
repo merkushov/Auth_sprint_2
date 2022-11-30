@@ -111,6 +111,15 @@ def setup_v1_routes(api_v1: Blueprint):
     )
 
     api_v1.add_url_rule(
+        "/me",
+        "get_current_user_info",
+        view_func=api_v1_c.get_user_controller().get_current_user_info,
+        methods=[
+            "GET",
+        ],
+    )
+
+    api_v1.add_url_rule(
         "/me/roles",
         "get_my_roles",
         view_func=api_v1_c.get_user_controller().get_my_roles,
